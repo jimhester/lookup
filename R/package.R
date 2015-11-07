@@ -11,6 +11,12 @@ lookup <- function(x, visible = FALSE, ...) {
          builtin = print_compiled(name, x, visible, ...))
 }
 
+print_compiled <- function(name, def, visible, ...) {
+  map <- names_map()
+
+  source_definition(map[name])
+}
+
 print_function <- function(name, def, visible, ...) {
   if (isS4(x)) {
     return(print_s4(x, ...))
@@ -57,6 +63,56 @@ print.getAnywhere <- function(x, ...) {
   invisible()
 }
 
-names_file <- memoise::memoise(function(branch = "master") {
-  readLines(paste(sep = "/", "https://raw.githubusercontent.com/wch/r-source", branch, "src/main/names.c"))
+github_content <- memoise::memoise(function(path, branch = "master") {
+  readLines(paste(sep = "/", "https://raw.githubusercontent.com/wch/r-source", branch, path))
 })
+
+names_map <- function(branch = "master") {
+  x <- github_content("src/main/names.c", branch = branch)
+  m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]+([^,]+)", x, perl = TRUE)
+  res <- captures(x, m)
+  res <- res[m != -1, ]
+  res
+  setNames(res$X2, res$X1)
+}
+
+captures <- function(x, m) {
+  starts <- attr(m, "capture.start")
+  res <- substring(x, starts, starts + attr(m, "capture.length") - 1L)
+  data.frame(matrix(res, ncol = NCOL(starts)))
+}
+
+source_definition <- function(x) {
+  search <- gh("/search/code", q = paste("in:file", "repo:wch/r-source", "path:src/main", "language:c", x))
+  paths <- vapply(search$items, `[[`, character(1), "path")
+  compact(lapply(paths, function(path) {
+    lines <- github_content(path)
+    start <- grep(paste0(x, "\\([^)(]+)[[:space:]]*"), lines)
+    if (length(start)) {
+      ends <- grep("^}[[:space:]]*$", lines)
+      end <- ends[ends > start][1]
+      content <- paste0(collapse = "\n", lines[seq(start, end)])
+      Source(path = path, start = start, end = end, content = content)
+    }
+  }))
+}
+
+compact <- function(x) {
+  is_empty <- vapply(x, function(x) length(x) == 0, logical(1))
+  x[!is_empty]
+}
+
+Source <- function(path, start, end, content) {
+   structure(
+     list(
+       path = path,
+       start = start,
+       end = end,
+       content = content),
+     class = "source")
+}
+
+print.source <- function(x, ...) {
+  cat(crayon::bold(paste0(x$path, "#L", x$start, "-L", x$end)),
+    x$content, sep = "\n")
+}
