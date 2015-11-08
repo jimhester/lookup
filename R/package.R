@@ -8,20 +8,31 @@ lookup <- function(x, visible = FALSE, ...) {
   switch(typeof(x),
          closure = print_function(name, x, visible, ...),
          special =,
-         builtin = print_compiled(name, x, visible, ...))
+         builtin = print_compiled(name, x, "primitive", visible, ...))
 }
 
-print_compiled <- function(name, def, visible, ...) {
+print_compiled <- function(name, def, type, visible, ...) {
   map <- names_map()
+  source_name <- map[name]
 
-  source_definition(map[name])
+  lapply(source_definition(source_name),
+    function(x) {
+      x$name <- name
+      x$type <- type
+      x
+    })
 }
 
 print_function <- function(name, def, visible, ...) {
+  if (is_internal(def)) {
+    body <- body(def)
+    return(print_compiled(name = as.character(body[[length(body)]][[2]][[1]]),
+      def = def, type = "internal", visible = visible, ...))
+  }
   if (isS4(x)) {
     return(print_s4(x, ...))
   } else if (is_S3_generic(def)) {
-    print_s3_generic(name, visible = visible)
+    return(print_s3_generic(name, visible = visible))
   } else {
     print(getAnywhere(name), visible = visible)
   }
@@ -31,6 +42,10 @@ print_function <- function(name, def, visible, ...) {
   identical(x, as.name(y))
 }
 
+is_internal <- function(x) {
+  body <- body(x)
+  body[[length(body)]][[1]] %==% ".Internal"
+}
 is_S3_generic <- function(x) {
   body <- body(x)
   body[[1]] %==% "UseMethod" ||
@@ -69,7 +84,7 @@ github_content <- memoise::memoise(function(path, branch = "master") {
 
 names_map <- function(branch = "master") {
   x <- github_content("src/main/names.c", branch = branch)
-  m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]+([^,]+)", x, perl = TRUE)
+  m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]*([^,]+)", x, perl = TRUE)
   res <- captures(x, m)
   res <- res[m != -1, ]
   res
@@ -79,8 +94,10 @@ names_map <- function(branch = "master") {
 captures <- function(x, m) {
   starts <- attr(m, "capture.start")
   res <- substring(x, starts, starts + attr(m, "capture.length") - 1L)
-  data.frame(matrix(res, ncol = NCOL(starts)))
+  data.frame(matrix(res, ncol = NCOL(starts)), stringsAsFactors = FALSE)
 }
+
+gh <- memoise::memoise(gh::gh)
 
 source_definition <- function(x) {
   search <- gh("/search/code", q = paste("in:file", "repo:wch/r-source", "path:src/main", "language:c", x))
@@ -102,17 +119,23 @@ compact <- function(x) {
   x[!is_empty]
 }
 
-Source <- function(path, start, end, content) {
+Source <- function(path, start, end, content, name = "", type = "") {
    structure(
      list(
        path = path,
        start = start,
        end = end,
-       content = content),
+       content = content,
+       name = name,
+       type = type),
      class = "source")
 }
 
 print.source <- function(x, ...) {
-  cat(crayon::bold(paste0(x$path, "#L", x$start, "-L", x$end)),
+  cat(crayon::bold(paste0(upper(x$type), " function ", x$name, ": ", x$path, "#L", x$start, "-L", x$end)),
     x$content, sep = "\n")
+}
+
+upper <- function(x) {
+   gsub("\\b(.)", "\\U\\1", x, perl = TRUE)
 }
