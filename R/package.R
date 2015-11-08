@@ -15,7 +15,7 @@ print_compiled <- function(name, def, type, visible, ...) {
   map <- names_map()
   source_name <- map[name]
 
-  lapply(source_definition(source_name),
+  lapply(r_source_definition(source_name),
     function(x) {
       x$name <- name
       x$type <- type
@@ -78,17 +78,20 @@ print.getAnywhere <- function(x, ...) {
   invisible()
 }
 
-github_content <- memoise::memoise(function(path, branch = "master") {
+package_github_content <- memoise::memoise(function(package, path, branch = "master") {
+  readLines(paste(sep = "/", "https://raw.githubusercontent.com/cran", package, branch, path))
+})
+
+r_github_content <- memoise::memoise(function(path, branch = "master") {
   readLines(paste(sep = "/", "https://raw.githubusercontent.com/wch/r-source", branch, path))
 })
 
 names_map <- function(branch = "master") {
-  x <- github_content("src/main/names.c", branch = branch)
+  x <- r_github_content("src/main/names.c", branch = branch)
   m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]*([^,]+)", x, perl = TRUE)
   res <- captures(x, m)
   res <- res[m != -1, ]
-  res
-  setNames(res$X2, res$X1)
+  setNames(res[[2]], res[[1]])
 }
 
 captures <- function(x, m) {
@@ -99,18 +102,29 @@ captures <- function(x, m) {
 
 gh <- memoise::memoise(gh::gh)
 
-source_definition <- function(x) {
-  search <- gh("/search/code", q = paste("in:file", "repo:wch/r-source", "path:src/main", "language:c", x))
-  paths <- vapply(search$items, `[[`, character(1), "path")
+parse_source <- function(name, lines) {
+  start <- grep(paste0("[[:space:]]+", name, "\\([^)(]+)[[:space:]]*"), lines)
+  if (length(start)) {
+    ends <- grep("^}[[:space:]]*$", lines)
+    end <- ends[ends > start][1]
+    content <- paste0(collapse = "\n", lines[seq(start, end)])
+    Compiled(path = path, start = start, end = end, content = content)
+  }
+}
+
+r_source_definition <- function(x) {
+  response <- gh("/search/code", q = paste("in:file", "repo:wch/r-source", "path:src/main", "language:c", x))
+  paths <- vapply(response$items, `[[`, character(1), "path")
   compact(lapply(paths, function(path) {
-    lines <- github_content(path)
-    start <- grep(paste0(x, "\\([^)(]+)[[:space:]]*"), lines)
-    if (length(start)) {
-      ends <- grep("^}[[:space:]]*$", lines)
-      end <- ends[ends > start][1]
-      content <- paste0(collapse = "\n", lines[seq(start, end)])
-      Source(path = path, start = start, end = end, content = content)
-    }
+    parse_source(x, r_github_content(path))
+  }))
+}
+
+package_source_definition <- function(package, x) {
+  response <- gh("/search/code", q = paste("in:file", paste0("repo:cran/", package), "path:src/", "language:c", "language:c++", x))
+  paths <- vapply(response$items, `[[`, character(1), "path")
+  compact(lapply(paths, function(path) {
+    parse_source(x, package_github_content(package, path))
   }))
 }
 
@@ -119,7 +133,7 @@ compact <- function(x) {
   x[!is_empty]
 }
 
-Source <- function(path, start, end, content, name = "", type = "") {
+Compiled <- function(path, start, end, content, name = "", type = "") {
    structure(
      list(
        path = path,
@@ -128,10 +142,10 @@ Source <- function(path, start, end, content, name = "", type = "") {
        content = content,
        name = name,
        type = type),
-     class = "source")
+     class = "compiled")
 }
 
-print.source <- function(x, ...) {
+print.compiled <- function(x, ...) {
   cat(crayon::bold(paste0(upper(x$type), " function ", x$name, ": ", x$path, "#L", x$start, "-L", x$end)),
     x$content, sep = "\n")
 }
