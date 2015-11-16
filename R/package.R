@@ -1,64 +1,136 @@
-library(gh)
-
-lookup <- function(x, visible = FALSE, ...) {
+lookup <- function(x, envir = parent.frame(), all = FALSE, ...) {
+  fun <- list()
   if (!is.character(x)) {
-    name <- as.character(substitute(x))
-  }
+    nme <- substitute(x)
+    if (nme == "x") {
+      env <- if (is.primitive(x)) {
+        fun$package <- "base"
 
-  switch(typeof(x),
-         closure = print_function(name, x, visible, ...),
-         special =,
-         builtin = print_compiled(name, x, "primitive", visible, ...))
-}
-
-print_compiled <- function(name, def, type, visible, ...) {
-  map <- names_map()
-  source_name <- map[name]
-
-  lapply(r_source_definition(source_name),
-    function(x) {
-      x$name <- name
-      x$type <- type
-      x
-    })
-}
-
-print_function <- function(name, def, visible, ...) {
-  if (is_internal(def)) {
-    body <- body(def)
-    return(print_compiled(name = as.character(body[[length(body)]][[2]][[1]]),
-      def = def, type = "internal", visible = visible, ...))
-  }
-  if (isS4(x)) {
-    return(print_s4(x, ...))
-  } else if (is_S3_generic(def)) {
-    return(print_s3_generic(name, visible = visible))
+      } else {
+        fun$package <- environmentName(environment(x))
+      }
+      fun$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(envir = env))
+    } else {
+    fun[c("package", "name")] <- parse_name(nme)
+    }
+    fun$def <- x
   } else {
-    print(getAnywhere(name), visible = visible)
+    fun[c("package", "name")] <- parse_name(x)
+    fun$def <- get(fun$name, envir = fun$package %||% envir, mode = "function")
   }
+  fun$package <- fun$package %||% environmentName(environment(fun$def))
+  fun$type <- typeof(fun$def)
+  fun$visible <- is_visible(fun$name, envir = envir)
+  class(fun) <- "lookup"
+
+  switch(fun$type,
+         closure = lookup_closure(fun, envir = envir, all = all, ...),
+         special =,
+         builtin = lookup_special(fun, envir = envir, all = all, ...),
+         stop("Function of type: ", fun$type, " not supported!", call. = FALSE))
+}
+
+loaded_functions <- memoise::memoise(function(envs = loadedNamespaces()) {
+  fnames <- lapply(envs,
+    function(e) ls(envir = asNamespace(e), all.names = TRUE))
+  data.frame(name = unlist(fnames),
+    package = rep.int(envs, lengths(fnames)),
+    stringsAsFactors = FALSE)
+})
+
+#print.function <- function(x, ...) print.lookup(lookup(x, ...))
+
+parse_name <- function(x) {
+  if (is.name(x)) {
+    return(list(package = NULL, name = as.character(x)))
+  }
+  if (is.call(x) && (x[[1]] %==% "::" || x[[2]] %==% ":::")) {
+    return(list(package = asNamespace(as.character(x[[2]])),
+                name = as.character(x[[3]])))
+  }
+  if (is.character(x)) {
+    split <- strsplit(x, ":::?")[[1]]
+    res <- if (length(split) == 2) {
+      list(package = split[[1]],
+           name = split[[2]])
+    } else {
+      list(package = NULL,
+           name = split[[1]])
+    }
+    return(res)
+  }
+  stop("Cannot handle input ", x, " of type: ", typeof(x), call. = FALSE)
+}
+
+lookup_special <- function(fun, envir = parent.frame(), ...) {
+  map <- names_map()
+  source_name <- map[fun$name]
+
+  r_source_definition(source_name)
+}
+
+lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
+  if (pryr:::is_internal(fun$def)) {
+    fun$internal <- lookup_special(list(name = pryr:::internal_name(fun$def)))
+  }
+  if (pryr::is_s3_method(fun$name)) {
+    fun$type <- append(fun$type, "S3 method", 0)
+  }
+  if (pryr::is_s3_generic(fun$name)) {
+    fun$type <- append(fun$type, "S3 generic", 0)
+    fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
+  }
+  if (isS4(fun$def)) {
+    fun$type <- append(fun$type, "S4 generic", 0)
+    fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
+  }
+  fun
 }
 
 `%==%` <- function(x, y) {
   identical(x, as.name(y))
 }
 
-is_internal <- function(x) {
-  body <- body(x)
-  body[[length(body)]][[1]] %==% ".Internal"
-}
-is_S3_generic <- function(x) {
-  body <- body(x)
-  body[[1]] %==% "UseMethod" ||
-      (body[[1]] %==% "{" &&
-       body[[2]] %==% "UseMethod")
+lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
+
+  S3_methods <- methods(f$name)
+  S3_methods <- S3_methods[attr(S3_methods, "info")$isS4 == FALSE]
+
+  funs <- loaded_functions()
+  res <- funs[match(S3_methods, funs$name), ]
+  Map(function(name, package) { lookup(name, asNamespace(package)) }, res$name, res$package)
 }
 
-print_s3_generic <- function(x, visible = TRUE, ...) {
-  m <- attr(methods(x), "info")
-  if (isTRUE(visible)) {
-    m <- m[m$visible == TRUE, ]
+print.lookup <- function(x, envir = parent.frame(), ..., highlight = Sys.which("highlight")) {
+  lookup <- if (x$visible) "::" else ":::"
+
+  cat(crayon::bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
+  cat(highlight_output(base::print.function(x$def), highlight, "r"), sep = "\n")
+  if (!is.null(x$internal)) {
+    lapply(x$internal, print, envir = envir, highlight = highlight)
   }
-  print(lapply(rownames(m), getAnywhere))
+  if (!is.null(x$S3_methods)) {
+    lapply(x$S3_methods, print, envir = envir, highlight = highlight)
+  }
+  invisible(x)
+}
+
+
+
+highlight_output <- function(code, path, type = "r") {
+  if (nzchar(path)) {
+    tmp <- tempfile()
+    on.exit(unlink(tmp))
+    capture.output(force(code), file = tmp)
+    system2(path, args = c("-f", "-S", type, "-O", "ansi", tmp), stdout = TRUE)
+  } else {
+    capture.output(force(code))
+  }
+}
+
+is_visible <- function(x, envir = parent.frame()) {
+  tryCatch(is.function(get(x, envir = envir, mode = "function")),
+           error = function(e) FALSE)
 }
 
 print.getAnywhere <- function(x, ...) {
@@ -102,13 +174,14 @@ captures <- function(x, m) {
 
 gh <- memoise::memoise(gh::gh)
 
-parse_source <- function(name, lines) {
-  start <- grep(paste0("[[:space:]]+", name, "\\([^)(]+)[[:space:]]*"), lines)
+parse_source <- function(name, path) {
+  lines <- r_github_content(path)
+  start <- grep(paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", name, "\\([^)(]+)[[:space:]]*"), lines)
   if (length(start)) {
-    ends <- grep("^}[[:space:]]*$", lines)
+    ends <- grep("^}[[:space:]]*/?.*$", lines)
     end <- ends[ends > start][1]
     content <- paste0(collapse = "\n", lines[seq(start, end)])
-    Compiled(path = path, start = start, end = end, content = content)
+    Compiled(path = path, start = start, end = end, content = content, type = "c")
   }
 }
 
@@ -116,7 +189,7 @@ r_source_definition <- function(x) {
   response <- gh("/search/code", q = paste("in:file", "repo:wch/r-source", "path:src/main", "language:c", x))
   paths <- vapply(response$items, `[[`, character(1), "path")
   compact(lapply(paths, function(path) {
-    parse_source(x, r_github_content(path))
+    parse_source(x, path)
   }))
 }
 
@@ -140,16 +213,17 @@ Compiled <- function(path, start, end, content, name = "", type = "") {
        start = start,
        end = end,
        content = content,
-       name = name,
        type = type),
      class = "compiled")
 }
 
-print.compiled <- function(x, ...) {
-  cat(crayon::bold(paste0(upper(x$type), " function ", x$name, ": ", x$path, "#L", x$start, "-L", x$end)),
-    x$content, sep = "\n")
+print.compiled <- function(x, highlight = Sys.which("highlight"), type = "c", ...) {
+  cat(crayon::bold(type, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
+    highlight_output(cat(x$content), highlight, x$type), sep = "\n")
 }
 
 upper <- function(x) {
    gsub("\\b(.)", "\\U\\1", x, perl = TRUE)
 }
+
+`%||%` <- function(x, y) if (is.null(x)) { y } else { x }
