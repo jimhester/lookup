@@ -1,14 +1,18 @@
-lookup <- function(x, envir = parent.frame(), all = FALSE, ...) {
+as_lookup <- function(x, nme, envir = parent.frame()) {
+  if (inherits(x, "lookup")) {
+    return(x)
+  }
+
   fun <- list()
   if (!is.character(x)) {
-    nme <- substitute(x)
     if (nme == "x") {
-      env <- if (is.primitive(x)) {
+      if (is.primitive(x)) {
         fun$package <- "base"
 
       } else {
         fun$package <- environmentName(environment(x))
       }
+      env <- asNamespace(fun$package)
       fun$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(envir = env))
     } else {
     fun[c("package", "name")] <- parse_name(nme)
@@ -20,8 +24,13 @@ lookup <- function(x, envir = parent.frame(), all = FALSE, ...) {
   }
   fun$package <- fun$package %||% environmentName(environment(fun$def))
   fun$type <- typeof(fun$def)
-  fun$visible <- is_visible(fun$name, envir = envir)
+  fun$visible <- is_visible(fun$name)
   class(fun) <- "lookup"
+
+  fun
+}
+lookup <- function(x, envir = parent.frame(), all = FALSE, ...) {
+  fun <- as_lookup(x, substitute(x), envir)
 
   switch(fun$type,
          closure = lookup_closure(fun, envir = envir, all = all, ...),
@@ -128,9 +137,16 @@ highlight_output <- function(code, path, type = "r") {
   }
 }
 
-is_visible <- function(x, envir = parent.frame()) {
-  tryCatch(is.function(get(x, envir = envir, mode = "function")),
-           error = function(e) FALSE)
+attached_functions <- memoise::memoise(function(sp = search()) {
+  fnames <- lapply(seq_along(sp), ls)
+  data.frame(name = unlist(fnames),
+    package = rep.int(.rmpkg(sp), lengths(fnames)),
+    stringsAsFactors = FALSE)
+})
+
+is_visible <- function(x) {
+  funs <- attached_functions()
+  any(funs$name == x)
 }
 
 print.getAnywhere <- function(x, ...) {
