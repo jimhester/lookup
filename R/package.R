@@ -1,36 +1,41 @@
-as_lookup <- function(x, nme, envir = parent.frame()) {
-  if (inherits(x, "lookup")) {
-    return(x)
-  }
-
-  fun <- list()
-  if (!is.character(x)) {
-    if (nme == "x") {
-      if (is.primitive(x)) {
-        fun$package <- "base"
-
-      } else {
-        fun$package <- environmentName(environment(x))
-      }
-      env <- asNamespace(fun$package)
-      fun$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(envir = env))
-    } else {
-    fun[c("package", "name")] <- parse_name(nme)
-    }
-    fun$def <- x
-  } else {
-    fun[c("package", "name")] <- parse_name(x)
-    fun$def <- get(fun$name, envir = fun$package %||% envir, mode = "function")
-  }
-  fun$package <- fun$package %||% environmentName(environment(fun$def))
-  fun$type <- typeof(fun$def)
-  fun$visible <- is_visible(fun$name)
-  class(fun) <- "lookup"
-
-  fun
+as_lookup <- function(x, envir = parent.frame(), ...) {
+  UseMethod("as_lookup")
 }
-lookup <- function(x, envir = parent.frame(), all = FALSE, ...) {
-  fun <- as_lookup(x, substitute(x), envir)
+
+as_lookup.lookup <- function(x, envir = parent.frame(), ...) {
+  x
+}
+
+as_lookup.character <- function(x, envir = parent.frame(), ...) {
+  res <- list()
+  res[c("package", "name")] <- parse_name(x)
+  res$def <- get(res$name, envir = res$package %||% envir, mode = "function")
+  res$package <- res$package %||% environmentName(environment(res$def))
+  res$type <- typeof(res$def)
+  res$visible <- is_visible(res$name)
+  class(res) <- "lookup"
+  res
+}
+
+as_lookup.function <- function(x, envir = parent.frame(), name = substitute(x)) {
+  res <- list(def = x)
+
+  if (is.primitive(res$def)) {
+    res$package <- "base"
+  } else {
+    res$package <- environmentName(environment(res$def))
+  }
+  env <- asNamespace(res$package)
+  res$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(envir = env))
+  res$package <- res$package %||% environmentName(environment(res$def))
+  res$type <- typeof(res$def)
+  res$visible <- is_visible(res$name)
+  class(res) <- "lookup"
+  res
+}
+
+lookup <- function(x, name = substitute(x), envir = parent.frame(), all = FALSE, ...) {
+  fun <- as_lookup(x, envir = envir, name = name)
 
   switch(fun$type,
          closure = lookup_closure(fun, envir = envir, all = all, ...),
@@ -50,25 +55,14 @@ loaded_functions <- memoise::memoise(function(envs = loadedNamespaces()) {
 #print.function <- function(x, ...) print.lookup(lookup(x, ...))
 
 parse_name <- function(x) {
-  if (is.name(x)) {
-    return(list(package = NULL, name = as.character(x)))
+  split <- strsplit(x, ":::?")[[1]]
+  if (length(split) == 2) {
+    list(package = split[[1]],
+         name = split[[2]])
+  } else {
+    list(package = NULL,
+         name = split[[1]])
   }
-  if (is.call(x) && (x[[1]] %==% "::" || x[[2]] %==% ":::")) {
-    return(list(package = asNamespace(as.character(x[[2]])),
-                name = as.character(x[[3]])))
-  }
-  if (is.character(x)) {
-    split <- strsplit(x, ":::?")[[1]]
-    res <- if (length(split) == 2) {
-      list(package = split[[1]],
-           name = split[[2]])
-    } else {
-      list(package = NULL,
-           name = split[[1]])
-    }
-    return(res)
-  }
-  stop("Cannot handle input ", x, " of type: ", typeof(x), call. = FALSE)
 }
 
 lookup_special <- function(fun, envir = parent.frame(), ...) {
@@ -102,12 +96,11 @@ lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
 
 lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
-  S3_methods <- methods(f$name)
-  S3_methods <- S3_methods[attr(S3_methods, "info")$isS4 == FALSE]
+  S3_methods <- .S3methods(f$name, envir = envir)
 
-  funs <- loaded_functions()
-  res <- funs[match(S3_methods, funs$name), ]
-  Map(function(name, package) { lookup(name, asNamespace(package)) }, res$name, res$package)
+  classes <- sub(paste0(escape(f$name), "."), "", S3_methods)
+
+  lapply(classes, function(class) lookup(getS3method(f$name, class), name = f$name))
 }
 
 print.lookup <- function(x, envir = parent.frame(), ..., highlight = Sys.which("highlight")) {
@@ -124,7 +117,10 @@ print.lookup <- function(x, envir = parent.frame(), ..., highlight = Sys.which("
   invisible(x)
 }
 
-
+escape <- function(x) {
+  chars <- c("*", ".", "?", "^", "+", "$", "|", "(", ")", "[", "]", "{", "}", "\\")
+  gsub(paste0("([\\", paste0(collapse = "\\", chars), "])"), "\\\\\\1", x, perl = TRUE)
+}
 
 highlight_output <- function(code, path, type = "r") {
   if (nzchar(path)) {
