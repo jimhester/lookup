@@ -106,6 +106,12 @@ test_that("captures works properly", {
   expect_identical(captures(x, m2),
     data_frame("1" = c("one", "two", "three"),
        "2" = c("1", "2", "3")))
+
+  re3 <- "(?<char>[[:alpha:]]+) (?<num>[[:digit:]]+)"
+  m2 <- regexpr(re2, x, perl = TRUE)
+  expect_identical(captures(x, m2),
+    data_frame("char" = c("one", "two", "three"),
+       "2" = c("num", "2", "3")))
 })
 
      #require(stats)
