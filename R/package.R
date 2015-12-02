@@ -170,18 +170,11 @@ r_github_content <- memoise::memoise(function(path, branch = "master") {
   readLines(paste(sep = "/", "https://raw.githubusercontent.com/wch/r-source", branch, path))
 })
 
-names_map <- function(branch = "master") {
-  x <- r_github_content("src/main/names.c", branch = branch)
+names_map <- function(x = r_github_content("src/main/names.c", branch = branch),
+                      branch = "master") {
   m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]*([^,]+)", x, perl = TRUE)
-  res <- captures(x, m)
-  res <- res[m != -1, ]
+  res <- na.omit(captures(x, m))
   setNames(res[[2]], res[[1]])
-}
-
-captures <- function(x, m) {
-  starts <- attr(m, "capture.start")
-  res <- substring(x, starts, starts + attr(m, "capture.length") - 1L)
-  data.frame(matrix(res, ncol = NCOL(starts)), stringsAsFactors = FALSE)
 }
 
 gh <- memoise::memoise(gh::gh)
@@ -239,3 +232,33 @@ upper <- function(x) {
 }
 
 `%||%` <- function(x, y) if (is.null(x)) { y } else { x }
+
+assert <- function(x, message = "") {
+  if(!isTRUE(x)) {
+    stop(message, call. = FALSE)
+  }
+}
+
+captures <- function(x, m) {
+  assert(is.character(x), "'x' must be a character vector")
+  assert(class(m) == "integer" &&
+    all(names(attributes(m)) == c("match.length", "useBytes", "capture.start", "capture.length", "capture.names")),
+    "'m' must be the result of 'regexpr()' with 'perl = TRUE'")
+
+  starts <- attr(m, "capture.start")
+  strings <- substring(x, starts, starts + attr(m, "capture.length") - 1L)
+  res <- data.frame(matrix(strings, ncol = NCOL(starts)), stringsAsFactors = FALSE)
+  colnames(res) <- auto_name(attr(m, "capture.names"))
+  res[m == -1, ] <- NA_character_
+  res
+}
+
+auto_name <- function(names) {
+  missing <- names == ""
+  if (all(!missing)) {
+    return(names)
+  }
+  names[missing] <- seq_along(names)[missing]
+  names
+}
+

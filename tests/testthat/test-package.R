@@ -29,23 +29,66 @@ test_that("as_lookup works", {
   expect_identical(res$visible, TRUE)
   expect_identical(res$def, base::max)
 })
-test_that("lookup for simple S3 generic works", {
 
-# with is a R only S3 generic, with only 1 method using Recommended packages.
+test_that("lookup for a simple function works", {
+  p1 <- lookup(replace)
+  expect_equal(p1$type, "closure")
 
-p1 <- lookup(with)
-expect_equal(p1$type, c("S3 generic", "closure"))
-
-p1 <- lookup(with, all = TRUE)
-expect_true(length(p1$S3_methods) >= 1)
-
-p2 <- lookup(base::with)
-expect_equal(p2$type, c("S3 generic", "closure"))
-
-p2 <- lookup(base::with, all = TRUE)
-expect_true(length(p2$S3_methods) >= 1)
+  expect_identical(lookup(replace), lookup(base::replace))
 })
 
+test_that("lookup for simple S3 generic works", {
+
+  # with is a R only S3 generic, with only 1 method in Recommended packages.
+  p1 <- lookup(with)
+  expect_equal(p1$type, c("S3 generic", "closure"))
+
+  expect_true(length(p1$S3_methods) >= 1)
+
+  p2 <- lookup(base::with)
+  expect_equal(p2$type, c("S3 generic", "closure"))
+
+  p2 <- lookup(base::with, all = TRUE)
+  expect_true(length(p2$S3_methods) >= 1)
+
+  expect_identical(p1, p2)
+})
+
+test_that("names_map works properly", {
+  x <- readRDS("names.c.rds")
+  m <- names_map(x)
+
+  expect_identical(m[["identical"]], "do_identical")
+  expect_identical(m[["makeLazy"]], "do_makelazy")
+  expect_identical(m[["<="]], "do_relop")
+  expect_identical(m[["-"]], "do_arith")
+  expect_identical(m[["setEncoding"]], "do_setencoding")
+})
+
+test_that("auto_name works properly", {
+  t1 <- c("one", "two")
+  expect_identical(auto_name(t1), t1)
+  t2 <- c("blah", "")
+  expect_identical(auto_name(t2), c("blah", "2"))
+  t3 <- c("", "blah")
+  expect_identical(auto_name(t3), c("1", "blah"))
+  t3 <- c("blah", "", "blah2")
+  expect_identical(auto_name(t3), c("blah", "2", "blah2"))
+})
+
+test_that("assert works properly", {
+  expect_error(assert(), "is missing, with no default")
+  expect_error(assert(0), "Error : \n")
+  expect_error(assert(FALSE), "Error : \n")
+  expect_null(assert(TRUE))
+
+  expect_error(assert(FALSE, "test"), "Error : test\n")
+}
+
+test_that("captures works properly", {
+
+
+})
 
      #require(stats)
      
