@@ -83,11 +83,29 @@ test_that("assert works properly", {
   expect_null(assert(TRUE))
 
   expect_error(assert(FALSE, "test"), "Error : test\n")
+})
+
+data_frame <- function(...) {
+  data.frame(..., stringsAsFactors = FALSE, check.names = FALSE)
 }
 
 test_that("captures works properly", {
+  x <- c("one 1", "two 2", "three 3")
+  re <- "([[:digit:]]+)"
+  m1 <- regexpr(re, x)
 
+  expect_error(captures(c(1, 2, 3), m1), "must be a character vector")
+  expect_error(captures(x, m1), "must be the result")
 
+  m2 <- regexpr(re, x, perl = TRUE)
+  expect_identical(captures(x, m2),
+    data_frame("1" = c("1", "2", "3")))
+
+  re2 <- "([[:alpha:]]+) ([[:digit:]]+)"
+  m2 <- regexpr(re2, x, perl = TRUE)
+  expect_identical(captures(x, m2),
+    data_frame("1" = c("one", "two", "three"),
+       "2" = c("1", "2", "3")))
 })
 
      #require(stats)

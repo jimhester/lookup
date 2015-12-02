@@ -242,7 +242,7 @@ assert <- function(x, message = "") {
 captures <- function(x, m) {
   assert(is.character(x), "'x' must be a character vector")
   assert(class(m) == "integer" &&
-    all(names(attributes(m)) == c("match.length", "useBytes", "capture.start", "capture.length", "capture.names")),
+    identical(names(attributes(m)), c("match.length", "useBytes", "capture.start", "capture.length", "capture.names")),
     "'m' must be the result of 'regexpr()' with 'perl = TRUE'")
 
   starts <- attr(m, "capture.start")
