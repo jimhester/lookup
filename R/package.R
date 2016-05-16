@@ -10,24 +10,39 @@ as_lookup.character <- function(x, envir = parent.frame(), ...) {
   res <- list()
   res[c("package", "name")] <- parse_name(x)
   res$def <- get(res$name, envir = res$package %||% envir, mode = "function")
-  res$package <- res$package %||% environmentName(environment(res$def))
+  res$package <- res$package %||% function_package(res$def)
   res$type <- typeof(res$def)
   res$visible <- is_visible(res$name)
   class(res) <- "lookup"
   res
 }
 
+function_package <- function(x) {
+  if (is.primitive(x)) {
+    return("base")
+  }
+  e <- environment(x)
+  nme <- environmentName(e)
+  while(!(nzchar(nme) || identical(e, baseenv()))) {
+    e <- parent.env(e)
+    nme <- environmentName(e)
+  }
+  if (!nzchar(nme)) {
+    stop("Could not find associated package", call. = FALSE)
+  }
+  nme
+}
+
 as_lookup.function <- function(x, envir = parent.frame(), name = substitute(x)) {
   res <- list(def = x)
 
+  res$package <- function_package(res$def)
   if (is.primitive(res$def)) {
-    res$package <- "base"
+    env <- baseenv()
   } else {
-    res$package <- environmentName(environment(res$def))
+    env <- environment(res$def)
   }
-  env <- asNamespace(res$package)
-  res$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(envir = env))
-  res$package <- res$package %||% environmentName(environment(res$def))
+  res$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(env))
   res$type <- typeof(res$def)
   res$visible <- is_visible(res$name)
   class(res) <- "lookup"
@@ -84,8 +99,12 @@ lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
     fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
   }
   if (isS4(fun$def)) {
-    fun$type <- append(fun$type, "S4 generic", 0)
-    fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
+    if (isGeneric(fun$name)) {
+      fun$type <- append(fun$type, "S4 generic", 0)
+      fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
+    } else {
+      fun$type <- append(fun$type, "S4 method")
+    }
   }
   fun
 }
@@ -103,6 +122,18 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   lapply(classes, function(class) lookup(getS3method(f$name, class), name = f$name))
 }
 
+lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
+
+  S4_methods <- .S4methods(f$name)
+  S4_methods_info <- attr(S4_methods, "info")
+
+  signatures <- strsplit(sub(paste0("^", escape(f$name), ",", "(.*)-method$"), "\\1", S4_methods), ",")
+
+  res <- Map(getMethod, f$name, signatures)
+  names(res) <- signatures
+  res
+}
+
 print.lookup <- function(x, envir = parent.frame(), ..., highlight = Sys.which("highlight")) {
   lookup <- if (x$visible) "::" else ":::"
 
@@ -113,6 +144,9 @@ print.lookup <- function(x, envir = parent.frame(), ..., highlight = Sys.which("
   }
   if (!is.null(x$S3_methods)) {
     lapply(x$S3_methods, print, envir = envir, highlight = highlight)
+  }
+  if (!is.null(x$S4_methods)) {
+    lapply(x$S4_methods, print, envir = envir, highlight = highlight)
   }
   invisible(x)
 }
@@ -136,7 +170,7 @@ highlight_output <- function(code, path, type = "r") {
 attached_functions <- memoise::memoise(function(sp = search()) {
   fnames <- lapply(seq_along(sp), ls)
   data.frame(name = unlist(fnames),
-    package = rep.int(.rmpkg(sp), lengths(fnames)),
+    package = rep.int(sub("package:", "", sp, fixed = TRUE), lengths(fnames)),
     stringsAsFactors = FALSE)
 })
 
@@ -261,4 +295,3 @@ auto_name <- function(names) {
   names[missing] <- seq_along(names)[missing]
   names
 }
-
