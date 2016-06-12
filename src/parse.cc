@@ -80,7 +80,7 @@ List parse_array_definition(std::string x) {
 // This returns the line number the end is on
 
 // [[Rcpp::export]]
-IntegerVector parse_c_function(CharacterVector x) {
+IntegerVector find_function_end(CharacterVector x) {
   int brace_level = 0;
   int out = 0;
   while (out < x.length()) {
