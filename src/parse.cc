@@ -57,7 +57,6 @@ List parse_array_definition(std::string x) {
           break;
         }
       case END_ARG:
-          Rcout << "arg:" << word << "\n";
         args.push_back(word);
         word.clear();
         state = ARG;
@@ -75,4 +74,38 @@ List parse_array_definition(std::string x) {
   }
   stop("Invalid input");
   return out;
+}
+
+// Find the end line of the function
+// This returns the line number the end is on
+
+// [[Rcpp::export]]
+IntegerVector parse_c_function(CharacterVector x) {
+  int brace_level = 0;
+  int out = 0;
+  while (out < x.length()) {
+    std::string line = as<std::string>(x[out]);
+    std::string::const_iterator i = line.begin();
+
+    // Find first brace
+    if (brace_level == 0) {
+      while(*i != '{' && i != line.end()) {
+        ++i;
+      }
+    }
+
+    for(;i != line.end(); ++i) {
+      if (*i == '{') {
+        ++brace_level;
+      }
+      if (*i == '}') {
+        --brace_level;
+      }
+      if (brace_level == 0) {
+        return IntegerVector(1, out + 1);
+      }
+    }
+    ++out;
+  }
+  return IntegerVector(1, NA_INTEGER);
 }

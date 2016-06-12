@@ -217,10 +217,11 @@ parse_source <- function(name, path) {
   lines <- r_github_content(path)
   start <- grep(paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", name, "\\([^)(]+)[[:space:]]*"), lines)
   if (length(start)) {
-    ends <- grep("^}[[:space:]]*/?.*$", lines)
-    end <- ends[ends > start][1]
-    content <- paste0(collapse = "\n", lines[seq(start, end)])
-    Compiled(path = path, start = start, end = end, content = content, type = "c")
+    length <- parse_c_function(lines[seq(start, length(lines))])
+    if (!is.na(length)) {
+      end <- start + length - 1
+      Compiled(path = path, start = start, end = end, content = paste(lines[seq(start, end)], collapse = "\n"), type = "c")
+    }
   }
 }
 

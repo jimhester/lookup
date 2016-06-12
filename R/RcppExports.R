@@ -5,3 +5,7 @@ parse_array_definition <- function(x) {
     .Call('printr_parse_array_definition', PACKAGE = 'printr', x)
 }
 
+parse_c_function <- function(x) {
+    .Call('printr_parse_c_function', PACKAGE = 'printr', x)
+}
+

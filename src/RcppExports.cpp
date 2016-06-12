@@ -16,3 +16,14 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// parse_c_function
+IntegerVector parse_c_function(CharacterVector x);
+RcppExport SEXP printr_parse_c_function(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    __result = Rcpp::wrap(parse_c_function(x));
+    return __result;
+END_RCPP
+}
