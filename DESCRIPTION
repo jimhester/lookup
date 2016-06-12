@@ -3,8 +3,15 @@ Title: Lookup and print function definitions
 Version: 0.0.0.9000
 Authors@R: person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
-Depends: R (>= 3.0.0)
-Imports: pryr, memoise
+Depends:
+    R (>= 3.0.0)
+Imports:
+    pryr,
+    memoise,
+    Rcpp
 License: MIT + file LICENSE
 LazyData: true
-Suggests: testthat
+Suggests:
+    testthat
+LinkingTo: Rcpp
+RoxygenNote: 5.0.1
