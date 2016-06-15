@@ -1,6 +1,6 @@
-#import <string>
-#import <Rcpp.h>
-#import <locale>
+#include <string>
+#include <Rcpp.h>
+#include <locale>
 
 using namespace Rcpp;
 
@@ -80,7 +80,7 @@ List parse_array_definition(std::string x) {
 // This returns the line number the end is on
 
 // [[Rcpp::export]]
-IntegerVector find_function_end(CharacterVector x) {
+IntegerVector find_function_end(const CharacterVector& x) {
   int brace_level = 0;
   int out = 0;
   while (out < x.length()) {

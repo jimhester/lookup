@@ -15,6 +15,6 @@ find_registration_github <- function(repo, path = "src") {
 
 
 parse_array_def <- function(x) {
-  re <- rex::rex("[]", any_spaces, "=", any_spaces, "{", capture(anything))
-  rex::re_matches(x, re)
+  re <- rex::rex("[]", any_spaces, "=", any_spaces, capture("{", anything))
+  parse_array_definition(rex::re_matches(paste(collapse = "\n", x), re, options = "s")[[1]])
 }
