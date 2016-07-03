@@ -1,4 +1,4 @@
-#' @useDynLib printr
+#' @useDynLib lookup
 #' @importFrom Rcpp sourceCpp
 
 find_registration_github <- function(repo, path = "src") {

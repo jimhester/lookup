@@ -88,8 +88,16 @@ lookup_special <- function(fun, envir = parent.frame(), ...) {
 }
 
 lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
-  if (pryr:::is_internal(fun$def)) {
-    fun$internal <- lookup_special(list(name = pryr:::internal_name(fun$def)))
+  if (has_call(fun$def, ".Internal")) {
+    fun$internal <- lookup_special(list(name = call_name(fun$def, ".Internal")))
+  }
+  if (has_call(fun$def, ".Call")) {
+    if (uses_rcpp(fun$package)) {
+      fun$ccall <- lookup_rcpp(call_name(fun$def, ".Call"), fun$package)
+    }
+    if (is.null(fun$ccall)) {
+      fun$ccall <- lookup_ccall(call_name(fun$def, ".Call"), fun$package)
+    }
   }
   if (pryr::is_s3_method(fun$name)) {
     fun$type <- append(fun$type, "S3 method", 0)
