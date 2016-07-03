@@ -61,13 +61,13 @@ lookup_rcpp <- function(name, package) {
       if (!is.na(length)) {
         end <- start + length - 1
         return(
-          Compiled(path = path,
+          list(Compiled(path = path,
             start = start,
             end = end,
             content = paste(lines[seq(start,
                 end)],
               collapse = "\n"),
-            type = "c"))
+            type = "c++")))
       }
     }
   }

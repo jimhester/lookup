@@ -150,6 +150,9 @@ print.lookup <- function(x, envir = parent.frame(), ..., highlight = Sys.which("
   if (!is.null(x$internal)) {
     lapply(x$internal, print, envir = envir, highlight = highlight)
   }
+  if (!is.null(x$ccall)) {
+    lapply(x$ccall, print, envir = envir, highlight = highlight)
+  }
   if (!is.null(x$S3_methods)) {
     lapply(x$S3_methods, print, envir = envir, highlight = highlight)
   }
@@ -265,8 +268,8 @@ Compiled <- function(path, start, end, content, name = "", type = "") {
      class = "compiled")
 }
 
-print.compiled <- function(x, highlight = Sys.which("highlight"), type = "c", ...) {
-  cat(crayon::bold(type, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
+print.compiled <- function(x, highlight = Sys.which("highlight"), ...) {
+  cat(crayon::bold(x$type, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
     highlight_output(cat(x$content), highlight, x$type), sep = "\n")
 }
 
