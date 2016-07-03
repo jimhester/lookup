@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // parse_array_definition
 List parse_array_definition(std::string x);
-RcppExport SEXP printr_parse_array_definition(SEXP xSEXP) {
+RcppExport SEXP lookup_parse_array_definition(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -18,7 +18,7 @@ END_RCPP
 }
 // find_function_end
 IntegerVector find_function_end(const CharacterVector& x);
-RcppExport SEXP printr_find_function_end(SEXP xSEXP) {
+RcppExport SEXP lookup_find_function_end(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
