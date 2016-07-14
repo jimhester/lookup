@@ -19,6 +19,9 @@ rcpp_symbol_map <- function(path) {
   # convert all spaces to match multiple spaces
   declarations <- gsub("[[:space:]]+", "[[:space:]]+", regex_escape(declarations))
 
+  # add wildcards before , and ) to handle default arguments
+  declarations <- gsub("(\\\\?[,)])", "[^,)]*\\1", declarations)
+
   setNames(declarations, paste0(name, "_", comments))
 }
 
