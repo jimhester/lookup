@@ -5,27 +5,27 @@
 
 using namespace Rcpp;
 
-// add
-double add(double x, double y);
-RcppExport SEXP TestRcpp_add(SEXP xSEXP, SEXP ySEXP) {
+// add_rcpp
+double add_rcpp(double x, double y);
+RcppExport SEXP TestRcpp_add_rcpp(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< double >::type x(xSEXP);
     Rcpp::traits::input_parameter< double >::type y(ySEXP);
-    __result = Rcpp::wrap(add(x, y));
+    __result = Rcpp::wrap(add_rcpp(x, y));
     return __result;
 END_RCPP
 }
-// add_default
-double add_default(double x, double y);
-RcppExport SEXP TestRcpp_add_default(SEXP xSEXP, SEXP ySEXP) {
+// add_rcpp_default
+double add_rcpp_default(double x, double y);
+RcppExport SEXP TestRcpp_add_rcpp_default(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< double >::type x(xSEXP);
     Rcpp::traits::input_parameter< double >::type y(ySEXP);
-    __result = Rcpp::wrap(add_default(x, y));
+    __result = Rcpp::wrap(add_rcpp_default(x, y));
     return __result;
 END_RCPP
 }
