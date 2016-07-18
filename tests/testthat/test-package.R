@@ -78,11 +78,11 @@ test_that("auto_name works properly", {
 
 test_that("assert works properly", {
   expect_error(assert(), "is missing, with no default")
-  expect_error(assert(0), "Error : \n")
-  expect_error(assert(FALSE), "Error : \n")
+  expect_error(assert(0), "")
+  expect_error(assert(FALSE), "")
   expect_null(assert(TRUE))
 
-  expect_error(assert(FALSE, "test"), "Error : test\n")
+  expect_error(assert(FALSE, "test"), "test")
 })
 
 data_frame <- function(...) {
