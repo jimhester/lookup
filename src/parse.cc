@@ -95,6 +95,11 @@ IntegerVector find_function_end(const CharacterVector& x) {
     }
 
     for(;i != line.end(); ++i) {
+      if (*i == '/') {
+        if (*(i + 1) == '/') {
+          continue;
+        }
+      }
       if (*i == '{') {
         ++brace_level;
       }
