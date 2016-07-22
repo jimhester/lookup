@@ -1,3 +1,5 @@
+context("lookup")
+
 test_that("as_lookup works", {
   is_factorial <- function(x) {
     expect_identical(x$name, "factorial")
