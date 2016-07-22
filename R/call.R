@@ -1,7 +1,7 @@
 c_symbol_map <- function(x) {
   res <- parseNamespaceFile(basename(x), dirname(x), mustExist = FALSE)
 
-  if (is.null(res$nativeRoutines)) {
+  if (length(res$nativeRoutines) == 0) {
     return(character())
   }
 
