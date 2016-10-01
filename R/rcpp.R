@@ -5,7 +5,7 @@ rcpp_symbol_map_local <- function(path) {
   rcpp_exports <- file.path(path, "src", "RcppExports.cpp")
 
   if (!file.exists(rcpp_exports)) {
-    return()
+    return(list())
   }
 
   lines <- readLines(rcpp_exports)
@@ -63,7 +63,6 @@ package_github_content <- memoise::memoise(function(package, path, branch = "mas
 find_cpp_function <- function(search, lines, path) {
   start <- grep(search, lines)
   if (length(start) > 0) {
-    browser()
     length <- find_function_end(lines[seq(start, length(lines))])
     if (!is.na(length)) {
       end <- start + length - 1
@@ -82,10 +81,9 @@ find_cpp_function <- function(search, lines, path) {
 lookup_rcpp_local <- function(name, path) {
 
   map <- rcpp_symbol_map_local(path)
-  browser()
   regex <- map[name]
   if (is.na(regex)) {
-    return()
+    return(list())
   }
 
   files <- list.files(file.path(path, "src"),
@@ -112,7 +110,7 @@ lookup_rcpp_cran <- function(name, package) {
   paths <- vapply(response$items, `[[`, character(1), "path")
   regex <- rcpp_symbol_map_cran(name, package)[name]
   if (any(is.na(regex))) {
-    return()
+    return(list())
   }
   compact(lapply(paths, function(path) {
       if (!grepl("RcppExports\\.cpp", path)) {

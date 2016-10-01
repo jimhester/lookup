@@ -96,7 +96,7 @@ lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
       fun$ccall <- lookup_rcpp(call_name(fun$def, ".Call"), fun$package)
     }
     if (is.null(fun$ccall)) {
-      fun$ccall <- lookup_ccall(call_name(fun$def, ".Call"), fun$package)
+      fun$ccall <- lookup_c_call(call_name(fun$def, ".Call"), fun$package)
     }
   }
   if (pryr::is_s3_method(fun$name)) {

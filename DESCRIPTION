@@ -6,9 +6,13 @@ Description: What the package does (one paragraph).
 Depends:
     R (>= 3.0.0)
 Imports:
+    gh,
     pryr,
     memoise,
-    Rcpp
+    Rcpp,
+    codetools,
+    crayon,
+    rex
 License: MIT + file LICENSE
 LazyData: true
 Suggests:

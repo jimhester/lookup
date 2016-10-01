@@ -2,6 +2,9 @@
 #include <R.h>
 #include <Rinternals.h>
 
+// declaration
+SEXP add_external_impl(SEXP args);
+
 SEXP add_call_impl(SEXP x, SEXP y) {
   SEXP out = PROTECT(Rf_ScalarReal(1));
   REAL(out)[0] = REAL(x)[0] + REAL(y)[0];
@@ -9,7 +12,8 @@ SEXP add_call_impl(SEXP x, SEXP y) {
   return out;
 }
 
-SEXP add_external_impl(SEXP args) {
+SEXP add_external_impl(SEXP args)
+{
   SEXP x, y;
 
   SEXP out = PROTECT(Rf_ScalarReal(1));

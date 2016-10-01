@@ -1,4 +1,4 @@
-c_symbol_map <- function(x) {
+c_symbol_map_local <- function(x) {
   res <- parseNamespaceFile(basename(x), dirname(x), mustExist = FALSE)
 
   if (length(res$nativeRoutines) == 0) {
@@ -8,7 +8,7 @@ c_symbol_map <- function(x) {
   res$nativeRoutines[[1]]$symbolNames
 }
 
-lookup_ccall <- function(name, package) {
+lookup_c_call <- function(name, package) {
 
   desc <- packageDescription(package)
 
@@ -22,21 +22,21 @@ lookup_ccall <- function(name, package) {
     stop("Unimplemented")
   }
 
-  map <- c_symbol_map(path)
+  map <- c_symbol_map_local(path)
   name <- map[name]
   if (is.na(name)) {
     return()
   }
 
   files <- list.files(file.path(path, "src"),
-    pattern = "[.]((c(c|pp))|(h(pp)?))$",
+    pattern = "[.][ch]$",
     ignore.case = TRUE,
     recursive = TRUE,
     full.names = TRUE)
 
   for (f in files) {
     lines <- readLines(f)
-    start <- grep(paste0("SEXP[[:space:]]+", name), lines)
+    start <- grep(paste0("[[:space:]]+", name, "\\([^)]+\\)[^;]*(?:$|\\{)"), lines)
     if (length(start) > 0) {
       length <- find_function_end(lines[seq(start, length(lines))])
       if (!is.na(length)) {

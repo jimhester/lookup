@@ -1,4 +1,4 @@
 library(testthat)
-library(printr)
+library(lookup)
 
-test_check("printr")
+test_check("lookup")
