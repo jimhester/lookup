@@ -35,17 +35,17 @@ lookup_rcpp <- function(name, package) {
   desc <- packageDescription(package)
 
   desc_file <- attr(desc, "file")
+  if (basename(desc_file) != "package.rds") {
+    return(lookup_rcpp_local(dirname(desc_file), package))
+  }
   if (is.null(desc$RemoteType)) {
     desc$RemoteType <- "cran"
   }
 
-  if (basename(desc_file) != "package.rds") {
-    return(lookup_rcpp_local(dirname(desc_file)))
-  }
   switch(desc$RemoteType,
     local = lookup_rcpp_local(name, desc$RemoteUrl),
     cran = lookup_rcpp_cran(name, package),
-    github = lookup_rcpp_github(name, desc$RemoteUrl),
+    github = lookup_rcpp_github(name, desc$RemoteUsername, desc$RemoteRepo),
     stop("Unimplemented")
     )
 }
@@ -106,7 +106,11 @@ lookup_rcpp_local <- function(name, path) {
 }
 
 lookup_rcpp_cran <- function(name, package) {
-  response <- gh("/search/code", q = paste("in:file", paste0("repo:cran/", package), "path:src/", "language:c", "language:c++", name))
+  lookup_rcpp_github(name, "cran", package)
+}
+
+lookup_rcpp_github <- function(name, user, package) {
+  response <- gh("/search/code", q = paste("in:file", paste0("repo:", user, "/", package), "path:src/", "language:c", "language:c++", name))
   paths <- vapply(response$items, `[[`, character(1), "path")
   regex <- rcpp_symbol_map_cran(name, package)[name]
   if (any(is.na(regex))) {
@@ -118,4 +122,3 @@ lookup_rcpp_cran <- function(name, package) {
       }
   }))
 }
-

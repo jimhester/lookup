@@ -16,6 +16,7 @@ Imports:
 License: MIT + file LICENSE
 LazyData: true
 Suggests:
-    testthat
+    testthat,
+    xml2
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1

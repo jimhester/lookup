@@ -1,9 +1,18 @@
 context("cran-rcpp")
 
-test_that("lookup_rcpp_cran", {
-  skip_on_cran()
+with_cran_package("tibble", {
+  test_that("lookup_rcpp_cran", {
+    skip_on_cran()
 
-  res <- lookup_rcpp_cran("node_type", "xml2")
-  expect_equal(length(res), 1L)
-  expect_equal(res[[1]]$content, "int node_type(XPtrNode node) {\n  return node->type;\n}")
+    res <- lookup_rcpp_cran("matrixToDataFrame", "tibble")
+    expect_equal(length(res), 1L)
+    expect_match(res[[1]]$content, "List matrixToDataFrame")
+  })
+
+  test_that("lookup_rcpp", {
+    lookup_rcpp("matrixToDataFrame", "tibble")
+
+    expect_equal(length(res), 1L)
+    expect_match(res[[1]]$content, "List matrixToDataFrame")
+  })
 })

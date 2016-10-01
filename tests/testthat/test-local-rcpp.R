@@ -1,14 +1,4 @@
-local({
-  if (!suppressWarnings(require("TestRcpp", quietly = TRUE))) {
-    lib <- tempfile()
-    on.exit(unlink(lib, recursive = TRUE), add = TRUE)
-    dir.create(lib)
-    libpath <- .libPaths()
-    on.exit(.libPaths(libpath), add = TRUE)
-    .libPaths(lib)
-    install.packages("TestRcpp", repo = NULL, type = "source", quiet = TRUE)
-  }
-
+with_local_package("TestRcpp", {
   context("local-rcpp")
   test_that("rcpp_symbol_map", {
 
@@ -23,6 +13,13 @@ local({
 
   test_that("lookup_rcpp_local", {
     res <- lookup_rcpp_local("add_rcpp", "TestRcpp")
+    expect_equal(length(x), 1L)
+
+    expect_equal(x[[1]]$content, "double add_rcpp(double x, double y) {\n  return x + y;\n}")
+  })
+
+  test_that("lookup_rcpp", {
+    res <- lookup_rcpp("add_rcpp", "TestRcpp")
     expect_equal(length(x), 1L)
 
     expect_equal(x[[1]]$content, "double add_rcpp(double x, double y) {\n  return x + y;\n}")
