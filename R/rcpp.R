@@ -114,7 +114,7 @@ lookup_rcpp_cran <- function(name, package) {
   }
   compact(lapply(paths, function(path) {
       if (!grepl("RcppExports\\.cpp", path)) {
-        find_cpp_function(regex, package_github_content(package, path), path)
+        find_cpp_function(regex, package_github_content(package, path), path)[[1]]
       }
   }))
 }
