@@ -13,16 +13,16 @@ with_local_package("TestRcpp", {
 
   test_that("lookup_rcpp_local", {
     res <- lookup_rcpp_local("add_rcpp", "TestRcpp")
-    expect_equal(length(x), 1L)
+    expect_equal(length(res), 1L)
 
-    expect_equal(x[[1]]$content, "double add_rcpp(double x, double y) {\n  return x + y;\n}")
+    expect_equal(res[[1]]$content, "double add_rcpp(double x, double y) {\n  return x + y;\n}")
   })
 
   test_that("lookup_rcpp", {
     res <- lookup_rcpp("add_rcpp", "TestRcpp")
-    expect_equal(length(x), 1L)
+    expect_equal(length(res), 1L)
 
-    expect_equal(x[[1]]$content, "double add_rcpp(double x, double y) {\n  return x + y;\n}")
+    expect_equal(res[[1]]$content, "double add_rcpp(double x, double y) {\n  return x + y;\n}")
   })
 
   context("local-c")

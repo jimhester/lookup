@@ -1,3 +1,8 @@
+#' @importFrom methods .S4methods getMethod isGeneric
+#' @importFrom stats na.omit setNames
+#' @importFrom utils .S3methods capture.output getS3method packageDescription
+NULL
+
 as_lookup <- function(x, envir = parent.frame(), ...) {
   UseMethod("as_lookup")
 }

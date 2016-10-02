@@ -10,7 +10,7 @@ with_github_package("tidyverse/tibble", {
   })
 
   test_that("lookup_rcpp", {
-    lookup_rcpp("matrixToDataFrame", "tibble")
+    res <- lookup_rcpp("matrixToDataFrame", "tibble")
 
     expect_equal(length(res), 1L)
     expect_match(res[[1]]$content, "List matrixToDataFrame")

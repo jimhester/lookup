@@ -12,7 +12,8 @@ Imports:
     Rcpp,
     codetools,
     crayon,
-    rex
+    rex,
+    methods
 License: MIT + file LICENSE
 LazyData: true
 Suggests:
