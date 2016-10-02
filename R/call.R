@@ -67,13 +67,13 @@ call_name <- function(f, type) {
     for (i in rev(seq_along(x))) {
       ccall <- call_calls(x[[i]])
       if (!is.null(ccall)) {
-         return(ccall)
+        return(ccall)
       }
     }
     NULL
   }
   call <- call_calls(body(f))
-  as.character(call[[2]])
+  as.character(call[[2]][[1]])
 }
 
 has_call <- function(f, type) {

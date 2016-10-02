@@ -60,7 +60,7 @@ lookup <- function(x, name = substitute(x), envir = parent.frame(), all = FALSE,
   switch(fun$type,
          closure = lookup_closure(fun, envir = envir, all = all, ...),
          special =,
-         builtin = lookup_special(fun, envir = envir, all = all, ...),
+         builtin = lookup_internal(fun, envir = envir, all = all, ...),
          stop("Function of type: ", fun$type, " not supported!", call. = FALSE))
 }
 
@@ -85,16 +85,9 @@ parse_name <- function(x) {
   }
 }
 
-lookup_special <- function(fun, envir = parent.frame(), ...) {
-  map <- names_map()
-  source_name <- map[fun$name]
-
-  r_source_definition(source_name)
-}
-
 lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
   if (has_call(fun$def, ".Internal")) {
-    fun$internal <- lookup_special(list(name = call_name(fun$def, ".Internal")))
+    fun$internal <- lookup_internal(list(name = call_name(fun$def, ".Internal")))
   }
   if (has_call(fun$def, ".Call")) {
     if (uses_rcpp(fun$package)) {
@@ -224,26 +217,6 @@ names_map <- function(x = r_github_content("src/main/names.c", branch = branch),
 }
 
 gh <- memoise::memoise(gh::gh)
-
-parse_source <- function(name, path) {
-  lines <- r_github_content(path)
-  start <- grep(paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", name, "\\([^)(]+)[[:space:]]*"), lines)
-  if (length(start)) {
-    length <- find_function_end(lines[seq(start, length(lines))])
-    if (!is.na(length)) {
-      end <- start + length - 1
-      Compiled(path = path, start = start, end = end, content = paste(lines[seq(start, end)], collapse = "\n"), type = "c")
-    }
-  }
-}
-
-r_source_definition <- function(x) {
-  response <- gh("/search/code", q = paste("in:file", "repo:wch/r-source", "path:src/main", "language:c", x))
-  paths <- vapply(response$items, `[[`, character(1), "path")
-  compact(lapply(paths, function(path) {
-    parse_source(x, path)
-  }))
-}
 
 package_source_definition <- function(package, x) {
   response <- gh("/search/code", q = paste("in:file", paste0("repo:cran/", package), "path:src/", "language:c", "language:c++", x))
