@@ -36,13 +36,15 @@ lookup_rcpp <- function(name, package) {
 
   desc_file <- attr(desc, "file")
   if (basename(desc_file) != "package.rds") {
-    return(lookup_rcpp_local(dirname(desc_file), package))
+    desc$RemoteType <- "local"
+    desc$RemoteUrl <- dirname(package)
   }
-  if (is.null(desc$RemoteType)) {
+
+  if (desc$Repository %==% "CRAN") {
     desc$RemoteType <- "cran"
   }
 
-  switch(desc$RemoteType,
+  switch(desc$RemoteType %||% "unknown",
     local = lookup_rcpp_local(name, desc$RemoteUrl),
     cran = lookup_rcpp_cran(name, package),
     github = lookup_rcpp_github(name, desc$RemoteUsername, desc$RemoteRepo),

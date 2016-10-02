@@ -6,3 +6,6 @@ regex_escape <- function(x) {
 uses_rcpp <- function(pkg) {
   grepl("\\bRcpp\\b", perl = TRUE, packageDescription(pkg)$LinkingTo)
 }
+
+`%||%` <- function(x, y) if (is.null(x)) y else x
+`%==%` <- function(x, y) identical(x, y)
