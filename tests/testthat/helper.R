@@ -11,7 +11,11 @@ with_package <- function(f, ...) {
     force(code)
   }
 }
-with_cran_package <- with_package(install.packages, quiet = TRUE)
+with_cran_package <- with_package(function(...) {
+  old <- options(repos = c(CRAN = "https://cloud.r-project.org"))
+  on.exit(options(old))
+  install.packages(..., quiet = TRUE)
+})
 
 with_local_package <- with_package(devtools::install, repo = NULL, type = "source", quiet = TRUE)
 
