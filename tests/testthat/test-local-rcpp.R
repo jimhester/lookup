@@ -25,11 +25,4 @@ with_local_package("TestRcpp", {
     expect_equal(res[[1]]$content, "double add_rcpp(double x, double y) {\n  return x + y;\n}")
   })
 
-  context("local-c")
-  test_that("c_symbol_map", {
-    map <- c_symbol_map_local("TestRcpp")
-    expect_true("add_c_impl" %in% names(map))
-
-    expect_equal("add_c_impl", map[["add_c_impl"]])
-  })
 })

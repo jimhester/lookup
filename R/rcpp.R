@@ -44,12 +44,12 @@ lookup_rcpp <- function(name, package) {
     desc$RemoteType <- "cran"
   }
 
-  switch(desc$RemoteType %||% "unknown",
+  type <- desc$RemoteType %||% "unknown"
+  switch(type,
     local = lookup_rcpp_local(name, desc$RemoteUrl),
     cran = lookup_rcpp_cran(name, package),
     github = lookup_rcpp_github(name, desc$RemoteUsername, desc$RemoteRepo),
-    stop("Unimplemented")
-    )
+    stop("`", type, "` unimplemented", call. = FALSE))
 }
 
 
@@ -62,7 +62,7 @@ package_github_content <- memoise::memoise(function(package, path, branch = "mas
   tryCatch(readLines(paste(sep = "/", "https://raw.githubusercontent.com/cran", package, branch, path)), warning = function(e) character())
 })
 
-find_cpp_function <- function(search, lines, path) {
+find_compiled_function <- function(search, lines, path, type) {
   start <- grep(search, lines)
   if (length(start) > 0) {
     length <- find_function_end(lines[seq(start, length(lines))])
@@ -75,7 +75,7 @@ find_cpp_function <- function(search, lines, path) {
             content = paste(lines[seq(start,
                 end)],
               collapse = "\n"),
-            type = "c++")))
+            type = "c")))
     }
   }
 }
@@ -100,7 +100,7 @@ lookup_rcpp_local <- function(name, path) {
     if (basename(f) == "RcppExports.cpp") {
        next
     }
-    res <- find_cpp_function(regex, readLines(f), f)
+    res <- find_compiled_function(regex, readLines(f), f)
     if (!is.null(res)) {
        return(res)
     }
@@ -113,14 +113,16 @@ lookup_rcpp_cran <- function(name, package) {
 
 lookup_rcpp_github <- function(name, user, package) {
   response <- gh("/search/code", q = paste("in:file", paste0("repo:", user, "/", package), "path:src/", "language:c", "language:c++", name))
+
   paths <- vapply(response$items, `[[`, character(1), "path")
+
   regex <- rcpp_symbol_map_cran(name, package)[name]
   if (any(is.na(regex))) {
     return(list())
   }
   compact(lapply(paths, function(path) {
       if (!grepl("RcppExports\\.cpp", path)) {
-        find_cpp_function(regex, package_github_content(package, path), path)[[1]]
+        find_compiled_function(regex, package_github_content(package, path), path)[[1]]
       }
   }))
 }

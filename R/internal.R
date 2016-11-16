@@ -19,7 +19,6 @@ internal_source <- function(x) {
 }
 
 lookup_internal <- function(fun, envir = parent.frame(), ...) {
-  browser()
   map <- names_map()
   source_name <- map[fun$name]
 

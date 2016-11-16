@@ -1,4 +1,4 @@
-c_symbol_map_local <- function(x) {
+symbol_map.c_source <- function(x, ...) {
   res <- parseNamespaceFile(basename(x), dirname(x), mustExist = FALSE)
 
   if (length(res$nativeRoutines) == 0) {
@@ -8,25 +8,47 @@ c_symbol_map_local <- function(x) {
   res$nativeRoutines[[1]]$symbolNames
 }
 
-lookup_c_call <- function(name, package) {
+lookup_function <- function(name, package, type) {
+  desc <- as.source_type(package, type)
 
-  desc <- packageDescription(package)
-
-  desc_file <- attr(desc, "file")
-
-  if (basename(desc_file) != "package.rds") {
-    path <- dirname(desc_file)
-  } else if (!is.null(desc$RemoteType) && desc$RemoteType == "local") {
-    path <- desc$RemoteUrl
-  } else {
-    stop("Unimplemented")
-  }
-
-  map <- c_symbol_map_local(path)
-  name <- map[name]
+  map <- symbol_map(desc)
+  regex <- map[name]
   if (is.na(name)) {
     return()
   }
+
+  files <- search_package(desc, name)
+  for (f in files) {
+    lines <- read_file(f)
+    start <- grep(regex, lines)
+    if (length(start) > 0) {
+      length <- find_function_end(lines[seq(start, length(lines))])
+      if (!is.na(length)) {
+        end <- start + length - 1
+        return(
+          list(Compiled(path = f,
+              start = start,
+              end = end,
+              content = paste(lines[seq(start,
+                  end)],
+                collapse = "\n"),
+              type = type)))
+      }
+    }
+  }
+}
+  #switch(class(desc)[[1]],
+    #local = lookup_rcpp_local(name, desc$RemoteUrl),
+    #cran = lookup_rcpp_cran(name, package),
+    #github = lookup_rcpp_github(name, desc$RemoteUsername, desc$RemoteRepo),
+    #stop("Unimplemented")
+    #)
+  #}
+#}
+
+lookup_source.c_call <- function(desc, name) {
+  desc <- as.source_type(package)
+  map <- symbol_map(desc)
 
   files <- list.files(file.path(path, "src"),
     pattern = "[.][ch]$",
@@ -34,52 +56,5 @@ lookup_c_call <- function(name, package) {
     recursive = TRUE,
     full.names = TRUE)
 
-  for (f in files) {
-    lines <- readLines(f)
-    start <- grep(paste0("[[:space:]]+", name, "\\([^)]+\\)[^;]*(?:$|\\{)"), lines)
-    if (length(start) > 0) {
-      length <- find_function_end(lines[seq(start, length(lines))])
-      if (!is.na(length)) {
-        end <- start + length - 1
-        return(
-          Compiled(path = path,
-            start = start,
-            end = end,
-            content = paste(lines[seq(start,
-                end)],
-              collapse = "\n"),
-            type = "c"))
-      }
-    }
-  }
-}
-
-call_name <- function(f, type) {
-  type <- as.symbol(type)
-
-  call_calls <- function(x) {
-    if (is.name(x) || is.atomic(x)) {
-      return(NULL)
-    }
-    if (identical(x[[1]], type)) {
-      return(x)
-    }
-    for (i in rev(seq_along(x))) {
-      ccall <- call_calls(x[[i]])
-      if (!is.null(ccall)) {
-        return(ccall)
-      }
-    }
-    NULL
-  }
-  call <- call_calls(body(f))
-  as.character(call[[2]][[1]])
-}
-
-has_call <- function(f, type) {
-  if (!is.function(f) || is.primitive(f)) {
-    return(FALSE)
-  }
-  calls <- codetools::findGlobals(f, merge = FALSE)$functions
-  any(calls %in% type)
+  find_compiled_function(paste0("[[:space:]]+", name, "\\([^)]+\\)[^;]*(?:$|\\{)"), files, "c")
 }

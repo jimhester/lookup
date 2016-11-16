@@ -2,7 +2,6 @@ with_package <- function(f, ...) {
   memoise::memoise(function(name, code) {
     tryCatch(unloadNamespace(name), error = function(e) NULL)
     lib <- tempfile(tmpdir = ".cache")
-    #on.exit(unlink(lib, recursive = TRUE), add = TRUE)
     dir.create(lib)
     libpath <- .libPaths()
     on.exit(.libPaths(libpath), add = TRUE)

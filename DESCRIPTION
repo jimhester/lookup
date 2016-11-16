@@ -13,11 +13,16 @@ Imports:
     codetools,
     crayon,
     rex,
-    methods
+    methods,
+    highlite
 License: MIT + file LICENSE
 LazyData: true
 Suggests:
     testthat,
-    xml2
+    xml2,
+    debugme
+Remotes:
+    local::~/p/highlite,
+    gaborcsardi/debugme
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1
