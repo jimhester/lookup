@@ -140,11 +140,11 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   res
 }
 
-print.lookup <- function(x, envir = parent.frame(), ..., highlight = Sys.which("highlight")) {
+print.lookup <- function(x, envir = parent.frame(), ...) {
   lookup <- if (x$visible) "::" else ":::"
 
   cat(crayon::bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
-  cat(highlight_output(base::print.function(x$def), highlight, "r"), sep = "\n")
+  cat(highlight_output(base::print.function(x$def), language = "r"), sep = "\n")
   if (!is.null(x$internal)) {
     lapply(x$internal, print, envir = envir, highlight = highlight)
   }
@@ -165,16 +165,13 @@ escape <- function(x) {
   gsub(paste0("([\\", paste0(collapse = "\\", chars), "])"), "\\\\\\1", x, perl = TRUE)
 }
 
-highlight_output <- function(code, path, type = "r") {
-  if (nzchar(path)) {
-    tmp <- tempfile()
-    on.exit(unlink(tmp))
-    capture.output(force(code), file = tmp)
-    system2(path, args = c("-f", "-S", type, "-O", "ansi", tmp), stdout = TRUE)
-  } else {
-    capture.output(force(code))
-  }
+highlight_output <- function(code, language = "r") {
+  highlite::highlight_string(capture.output(force(code)), language = language)
 }
+
+# Rstudio open function in viewer
+# Just function(x) View(x) or maybe
+# (rstudioapi::findFun("sendToConsole"))('View(cat)', echo = F)
 
 attached_functions <- memoise::memoise(function(sp = search()) {
   fnames <- lapply(seq_along(sp), ls)
@@ -248,9 +245,9 @@ Compiled <- function(path, start, end, content, name = "", type = "") {
      class = "compiled")
 }
 
-print.compiled <- function(x, highlight = Sys.which("highlight"), ...) {
+print.compiled <- function(x, ...) {
   cat(crayon::bold(x$type, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
-    highlight_output(cat(x$content), highlight, x$type), sep = "\n")
+    highlite::highlight_string(x$content, language = x$type), sep = "\n")
 }
 
 upper <- function(x) {
