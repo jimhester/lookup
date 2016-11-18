@@ -1,14 +1,19 @@
 with_package <- function(f, ...) {
-  memoise::memoise(function(name, code) {
+  install_f <- memoise::memoise(function(name) {
     tryCatch(unloadNamespace(name), error = function(e) NULL)
     lib <- tempfile(tmpdir = ".cache")
+    #on.exit(unlink(lib, recursive = TRUE), add = TRUE)
     dir.create(lib)
     libpath <- .libPaths()
-    on.exit(.libPaths(libpath), add = TRUE)
     .libPaths(c(lib, .libPaths()))
     f(name, ...)
-    force(code)
+    lib
   }, cache = memoise::cache_filesystem(".cache"))
+  function(name, code) {
+    old <- .libPaths(c(install_f(name), .libPaths()))
+    force(code)
+    on.exit(.libPaths(old))
+  }
 }
 with_cran_package <- with_package(function(...) {
   old <- options(repos = c(CRAN = "https://cloud.r-project.org"))
