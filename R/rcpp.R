@@ -1,18 +1,3 @@
-rcpp_symbol_map_local <- function(path) {
-
-  name <- basename(path)
-
-  rcpp_exports <- file.path(path, "src", "RcppExports.cpp")
-
-  if (!file.exists(rcpp_exports)) {
-    return(list())
-  }
-
-  lines <- readLines(rcpp_exports)
-
-  parse_rcpp_symbol_map(lines)
-}
-
 fetch_symbol_map.rcpp_local <- function(s) {
   path <- s$RemoteUrl
 
@@ -25,6 +10,11 @@ fetch_symbol_map.rcpp_local <- function(s) {
   }
 
   s$map_lines <- readLines(rcpp_exports)
+  s
+}
+
+fetch_symbol_map.rcpp_github <- function(s) {
+  s$map_lines <- github_content(s, "src/RcppExports.cpp")
   s
 }
 
@@ -59,6 +49,7 @@ search_package.rcpp_local <- function(s) {
     full.names = TRUE)
   s
 }
+
 lookup_rcpp <- function(name, package) {
   desc <- packageDescription(package)
 
@@ -86,7 +77,7 @@ rcpp_symbol_map_cran <- function(name, package) {
   parse_rcpp_symbol_map(lines)
 }
 
-package_github_content <- memoise::memoise(function(package, path, branch = "master") {
+package_github_content <- memoise::memoise(function(s, path) {
   tryCatch(readLines(paste(sep = "/", "https://raw.githubusercontent.com/cran", package, branch, path)), warning = function(e) character())
 })
 
