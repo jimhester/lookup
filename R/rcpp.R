@@ -40,13 +40,26 @@ parse_symbol_map.rcpp <- function(s) {
   s
 }
 
-search_package.rcpp_local <- function(s) {
+source_files.rcpp_local <- function(s, ...) {
   path <- s$RemoteUrl
   s$src_files <- list.files(file.path(path, "src"),
     pattern = "[.]((c(c|pp))|(h(pp)?))$",
     ignore.case = TRUE,
     recursive = TRUE,
     full.names = TRUE)
+
+  # Ignore the RcppExports file, not what we want
+  s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
+  s
+}
+
+search_package.rcpp_github <- function(s, name, ...) {
+  response <- gh("/search/code", q = paste("in:file", paste0("repo:", user, "/", package), "path:src/", "language:c", "language:c++", name))
+
+  s$src_files <- vapply(response$items, `[[`, character(1), "path")
+
+  # Ignore the RcppExports file, not what we want
+  s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
   s
 }
 

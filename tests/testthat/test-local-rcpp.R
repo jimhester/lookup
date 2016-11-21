@@ -15,4 +15,12 @@ with_local_package("TestRcpp", {
     s <- parse_symbol_map(s)
     expect_true(length(s$map) > 1)
   })
+
+  test_that("source_files", {
+    s <- as.source_type("TestRcpp", "rcpp")
+    s <- fetch_symbol_map(s)
+    s <- parse_symbol_map(s)
+    s <- source_files(s, "add_rcpp")
+    expect_equal(basename(s$src_files), "package.cpp")
+  })
 })

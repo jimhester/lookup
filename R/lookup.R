@@ -1,8 +1,8 @@
 fetch_symbol_map <- function(desc, ...) UseMethod("fetch_symbol_map")
 parse_symbol_map <- function(desc, ...) UseMethod("parse_symbol_map")
-search_package <- function(desc, name) UseMethod("search_source")
-fetch_source <- function(desc, name) UseMethod("fetch_source")
-parse_source <- function(desc, path, lines) UseMethod("parse_source")
+source_files <- function(desc, ...) UseMethod("source_files")
+fetch_source <- function(desc, path) UseMethod("fetch_source")
+parse_source <- function(desc) UseMethod("parse_source")
 
 as.source_type <- function(package, type) {
 
@@ -53,9 +53,9 @@ lookup_function <- function(name, package, type) {
     return()
   }
 
-  files <- search_package(desc, name)
-  for (f in files) {
-    lines <- parse_source(fetch_source(f))
+  s <- source_files(s, name)
+  for (path in s$src_files) {
+    lines <- parse_source(fetch_source(s, path))
     start <- grep(regex, lines)
     if (length(start) > 0) {
       length <- find_function_end(lines[seq(start, length(lines))])
