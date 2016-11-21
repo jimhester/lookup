@@ -6,7 +6,7 @@ parse_source <- function(desc, path, lines) UseMethod("parse_source")
 
 as.source_type <- function(package, type) {
 
-  desc <- tryCatch(packageDescription(package), warning = function(e) { stop(as.error(e)) })
+  desc <- tryCatch(packageDescription(package, lib.loc = .libPaths()), warning = function(e) { stop(as.error(e)) })
 
   desc_file <- attr(desc, "file")
   if (basename(desc_file) != "package.rds") {
