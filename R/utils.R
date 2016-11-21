@@ -9,3 +9,9 @@ uses_rcpp <- function(pkg) {
 
 `%||%` <- function(x, y) if (is.null(x) || (is.character(x) && !nzchar(x))) y else x
 `%==%` <- function(x, y) identical(x, y)
+
+# convert a specific warning to an error
+as.error <- function(e) {
+  class(e) <- c("simpleError", "error", "condition")
+  e
+}

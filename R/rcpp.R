@@ -13,7 +13,25 @@ rcpp_symbol_map_local <- function(path) {
   parse_rcpp_symbol_map(lines)
 }
 
-parse_rcpp_symbol_map <- function(lines) {
+fetch_symbol_map.rcpp_local <- function(s) {
+  path <- s$RemoteUrl
+
+  name <- basename(path)
+
+  rcpp_exports <- file.path(path, "src", "RcppExports.cpp")
+
+  if (!file.exists(rcpp_exports)) {
+    return(list())
+  }
+
+  s$map_lines <- readLines(rcpp_exports)
+  s
+}
+
+parse_symbol_map.rcpp <- function(s) {
+
+  lines <- s$map_lines
+
   comment_lines <- grep("// [[:alpha:]]+", lines[3:length(lines)]) + 2
 
   # remove // from comments
@@ -28,9 +46,19 @@ parse_rcpp_symbol_map <- function(lines) {
   # add wildcards before , and ) to handle default arguments
   declarations <- gsub("(\\\\?[,)])", "[^,)]*\\1", declarations)
 
-  setNames(declarations, comments)
+  s$map <- setNames(declarations, comments)
+  s
 }
 
+search_package.rcpp_local <- function(s) {
+  path <- s$RemoteUrl
+  s$src_files <- list.files(file.path(path, "src"),
+    pattern = "[.]((c(c|pp))|(h(pp)?))$",
+    ignore.case = TRUE,
+    recursive = TRUE,
+    full.names = TRUE)
+  s
+}
 lookup_rcpp <- function(name, package) {
   desc <- packageDescription(package)
 
