@@ -1,26 +1,35 @@
 with_local_package("TestRcpp", {
   context("local-rcpp")
+
+  #s <- NULL
   test_that("fetch_symbol_map", {
-    s <- as.source_type("TestRcpp", "rcpp")
-    s <- fetch_symbol_map(s)
+    s <<- as.source_type("TestRcpp", "rcpp", "add_rcpp")
+    s <<- fetch_symbol_map(s)
     expect_true(length(s$map_lines) > 1)
 
     expect_error(as.source_type("missing", "rcpp"), "no package 'missing' was found")
   })
 
   test_that("parse_symbol_map", {
-    s <- as.source_type("TestRcpp", "rcpp")
-    s <- fetch_symbol_map(s)
-
-    s <- parse_symbol_map(s)
+    s <<- parse_symbol_map(s)
     expect_true(length(s$map) > 1)
   })
 
   test_that("source_files", {
-    s <- as.source_type("TestRcpp", "rcpp")
-    s <- fetch_symbol_map(s)
-    s <- parse_symbol_map(s)
-    s <- source_files(s, "add_rcpp")
+    s <<- source_files(s)
     expect_equal(basename(s$src_files), "package.cpp")
+  })
+
+  test_that("fetch_source", {
+    s <<- fetch_source(s, s$src_files[[1]])
+    expect_true(length(s$src_lines) > 1)
+  })
+
+  test_that("parse_source", {
+    s <<- parse_source(s, s$map[s$search])
+    expect_true(length(s$fun_lines) > 1)
+
+    expect_true(s$fun_start > 1)
+    expect_true(s$fun_end > s$fun_start)
   })
 })

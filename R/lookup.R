@@ -2,9 +2,9 @@ fetch_symbol_map <- function(desc, ...) UseMethod("fetch_symbol_map")
 parse_symbol_map <- function(desc, ...) UseMethod("parse_symbol_map")
 source_files <- function(desc, ...) UseMethod("source_files")
 fetch_source <- function(desc, path) UseMethod("fetch_source")
-parse_source <- function(desc) UseMethod("parse_source")
+parse_source <- function(desc, search) UseMethod("parse_source")
 
-as.source_type <- function(package, type) {
+as.source_type <- function(package, type, search = NULL) {
 
   desc <- tryCatch(packageDescription(package, lib.loc = .libPaths()), warning = function(e) { stop(as.error(e)) })
 
@@ -19,57 +19,35 @@ as.source_type <- function(package, type) {
   }
 
   remote_type <- desc$RemoteType %||% "unknown"
-  class(desc) <- c(paste0(type, "_", remote_type), type, remote_type, class(desc))
-  desc
+  language <- switch(type,
+    rcpp = "c++",
+    type)
+
+  structure(list(description = desc, search = search, type = type, language = language, remote_type = remote_type),
+      class = c(paste0(type, "_", remote_type), type, remote_type))
 }
 
-find_compiled_function <- function(search, files, type) {
-  for (f in files) {
-    lines <- readLines(f)
-    start <- grep(search, lines)
-    if (length(start) > 0) {
-      length <- find_function_end(lines[seq(start, length(lines))])
-      if (!is.na(length)) {
-        end <- start + length - 1
-        return(
-          list(Compiled(path = f,
-              start = start,
-              end = end,
-              content = paste(lines[seq(start,
-                  end)],
-                collapse = "\n"),
-              type = "c")))
-      }
-    }
-  }
+in_map <- function(s, name) {
+  !is.na(s$map[name])
 }
 
 lookup_function <- function(name, package, type) {
-  s <- as.source_type(package, type)
+  s <- as.source_type(package, type, name)
 
-  s <- parse_symbol_map(fetch_symbol_map(desc))
-  regex <- s$map[name]
-  if (is.na(name)) {
+  s <- parse_symbol_map(fetch_symbol_map(s))
+  if (!in_map(s, name)) {
     return()
   }
 
   s <- source_files(s, name)
   for (path in s$src_files) {
-    lines <- parse_source(fetch_source(s, path))
-    start <- grep(regex, lines)
-    if (length(start) > 0) {
-      length <- find_function_end(lines[seq(start, length(lines))])
-      if (!is.na(length)) {
-        end <- start + length - 1
-        return(
-          list(Compiled(path = f,
-              start = start,
-              end = end,
-              content = paste(lines[seq(start,
-                  end)],
-                collapse = "\n"),
-              type = type)))
-      }
+    s <- parse_source(fetch_source(s, path), s$map[name])
+    if (!is.null(s$fun_lines)) {
+      return(Compiled(path = s$src_path,
+          start = s$fun_start,
+          end = s$fun_end,
+          content = paste0(s$fun_lines, collapse = "\n"),
+          type = s$language))
     }
   }
 }

@@ -1,23 +1,4 @@
-fetch_symbol_map.rcpp_local <- function(s) {
-  path <- s$RemoteUrl
-
-  name <- basename(path)
-
-  rcpp_exports <- file.path(path, "src", "RcppExports.cpp")
-
-  if (!file.exists(rcpp_exports)) {
-    return(list())
-  }
-
-  s$map_lines <- readLines(rcpp_exports)
-  s
-}
-
-fetch_symbol_map.rcpp_github <- function(s) {
-  s$map_lines <- github_content(s, "src/RcppExports.cpp")
-  s
-}
-
+# Works for all rcpp remote types
 parse_symbol_map.rcpp <- function(s) {
 
   lines <- s$map_lines
@@ -37,19 +18,63 @@ parse_symbol_map.rcpp <- function(s) {
   declarations <- gsub("(\\\\?[,)])", "[^,)]*\\1", declarations)
 
   s$map <- setNames(declarations, comments)
+  s$regex <- s$map[s$search]
+  s
+}
+
+# -- local repository methods
+fetch_symbol_map.rcpp_local <- function(s) {
+  path <- s$description$RemoteUrl
+
+  name <- basename(path)
+
+  rcpp_exports <- file.path(path, "src", "RcppExports.cpp")
+
+  if (!file.exists(rcpp_exports)) {
+    return(list())
+  }
+
+  s$map_lines <- readLines(rcpp_exports)
+  s
+}
+
+fetch_symbol_map.rcpp_github <- function(s) {
+  s$map_lines <- github_content(s, "src/RcppExports.cpp")
   s
 }
 
 source_files.rcpp_local <- function(s, ...) {
-  path <- s$RemoteUrl
+  path <- s$description$RemoteUrl
   s$src_files <- list.files(file.path(path, "src"),
     pattern = "[.]((c(c|pp))|(h(pp)?))$",
     ignore.case = TRUE,
-    recursive = TRUE,
-    full.names = TRUE)
+    recursive = TRUE)
 
   # Ignore the RcppExports file, not what we want
-  s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
+  s$src_files <- file.path("src", s$src_files[basename(s$src_files) != "RcppExports.cpp"])
+  s
+}
+
+fetch_source.local <- function(s, path) {
+  s$src_path <- file.path(s$description$RemoteUrl, path)
+  s$src_lines <- readLines(s$src_path)
+  s
+}
+
+parse_source.rcpp <- function(s, regex) {
+
+  start <- grep(regex, s$src_lines)
+  s$fun_start <- s$fun_end <- s$fun_lines <- NULL
+  if (length(start) > 0) {
+    length <- find_function_end(s$src_lines[seq(start, length(s$src_lines))])
+    if (!is.na(length)) {
+      end <- start + length - 1
+      s$fun_start <- start
+      s$fun_end <- end
+      s$fun_lines <- s$src_lines[seq(start, end)]
+      return(s)
+    }
+  }
   s
 }
 
@@ -101,13 +126,13 @@ find_compiled_function <- function(search, lines, path, type) {
     if (!is.na(length)) {
       end <- start + length - 1
       return(
-        list(Compiled(path = path,
+        Compiled(path = path,
             start = start,
             end = end,
             content = paste(lines[seq(start,
                 end)],
               collapse = "\n"),
-            type = "c")))
+            type = "c"))
     }
   }
 }

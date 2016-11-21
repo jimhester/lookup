@@ -166,6 +166,10 @@ escape <- function(x) {
 }
 
 highlight_output <- function(code, language = "r") {
+  # The highlight library uses the same syntax for c and c++
+  if (language == "c++") {
+    language <- "c"
+  }
   highlite::highlight_string(capture.output(force(code)), language = language)
 }
 
