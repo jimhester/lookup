@@ -32,4 +32,13 @@ with_local_package("TestRcpp", {
     expect_true(s$fun_start > 1)
     expect_true(s$fun_end > s$fun_start)
   })
+
+  test_that("lookup_function", {
+    res <- lookup_function("add_rcpp", "TestRcpp", "rcpp")
+
+    expect_true(nchar(res$content) > 0)
+    expect_equal(res$remote_type, "local")
+    expect_equal(res$type, "rcpp")
+    expect_equal(res$language, "c++")
+  })
 })

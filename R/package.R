@@ -238,20 +238,19 @@ compact <- function(x) {
   x[!is_empty]
 }
 
-Compiled <- function(path, start, end, content, name = "", type = "") {
+Compiled <- function(...) {
    structure(
-     list(
-       path = path,
-       start = start,
-       end = end,
-       content = content,
-       type = type),
+     list(...),
      class = "compiled")
 }
 
 print.compiled <- function(x, ...) {
-  cat(crayon::bold(x$type, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
-    highlite::highlight_string(x$content, language = x$type), sep = "\n")
+  language <- x$language
+  if (language == "c++") {
+    language <- "c"
+  }
+  cat(crayon::bold(x$language, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
+    highlite::highlight_string(x$content, language = language), sep = "\n")
 }
 
 upper <- function(x) {

@@ -47,7 +47,9 @@ lookup_function <- function(name, package, type) {
           start = s$fun_start,
           end = s$fun_end,
           content = paste0(s$fun_lines, collapse = "\n"),
-          type = s$language))
+          language = s$language,
+          type = s$type,
+          remote_type = s$remote_type))
     }
   }
 }
