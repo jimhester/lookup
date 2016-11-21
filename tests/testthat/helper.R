@@ -10,7 +10,8 @@ with_package <- function(f, ...) {
     lib
   }, cache = memoise::cache_filesystem(".cache"))
   function(name, code) {
-    old <- .libPaths(c(install_f(name), .libPaths()))
+    old <- .libPaths()
+    .libPaths(c(install_f(name), old))
     force(code)
     on.exit(.libPaths(old))
   }
