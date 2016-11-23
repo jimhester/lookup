@@ -56,13 +56,21 @@ as_lookup.function <- function(x, envir = parent.frame(), name = substitute(x)) 
   res
 }
 
-lookup <- function(x, name = substitute(x), envir = parent.frame(), all = FALSE, ...) {
+#' Lookup a function definiton
+#'
+#' @param x name or definition of a function
+#' @param name function name if not given in x
+#' @param envir the environment the function was defined in
+#' @param all Whether to return just loaded definitions or all definitions
+#' @param ... Additional arguments passed to internal functions
+#' @export
+lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.frame(), all = FALSE, ...) {
   fun <- as_lookup(x, envir = envir, name = name)
 
   switch(fun$type,
          closure = lookup_closure(fun, envir = envir, all = all, ...),
          special =,
-         builtin = lookup_internal(fun, envir = envir, all = all, ...),
+         builtin = lookup_function(fun, "internal"),
          stop("Function of type: ", fun$type, " not supported!", call. = FALSE))
 }
 
@@ -89,14 +97,14 @@ parse_name <- function(x) {
 
 lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
   if (has_call(fun$def, ".Internal")) {
-    fun$internal <- lookup_internal(list(name = call_name(fun$def, ".Internal")))
+    fun$internal <- lookup_function(list(name = call_name(fun$def, ".Internal")), "internal")
   }
   if (has_call(fun$def, ".Call")) {
     if (uses_rcpp(fun$package)) {
-      fun$ccall <- lookup_rcpp(call_name(fun$def, ".Call"), fun$package)
+      fun$ccall <- lookup_function(call_name(fun$def, ".Call"), "rcpp", fun$package)
     }
     if (is.null(fun$ccall)) {
-      fun$ccall <- lookup_c_call(call_name(fun$def, ".Call"), fun$package)
+      fun$ccall <- lookup_function(call_name(fun$def, ".Call"), "call", fun$package)
     }
   }
   if (pryr::is_s3_method(fun$name)) {
@@ -142,22 +150,23 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   res
 }
 
+#' @export
 print.lookup <- function(x, envir = parent.frame(), ...) {
   lookup <- if (x$visible) "::" else ":::"
 
   cat(crayon::bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
   cat(highlight_output(base::print.function(x$def), language = "r"), sep = "\n")
   if (!is.null(x$internal)) {
-    lapply(x$internal, print, envir = envir, highlight = highlight)
+    lapply(x$internal, print, envir = envir)
   }
   if (!is.null(x$ccall)) {
-    lapply(x$ccall, print, envir = envir, highlight = highlight)
+    lapply(x$ccall, print, envir = envir)
   }
   if (!is.null(x$S3_methods)) {
-    lapply(x$S3_methods, print, envir = envir, highlight = highlight)
+    lapply(x$S3_methods, print, envir = envir)
   }
   if (!is.null(x$S4_methods)) {
-    lapply(x$S4_methods, print, envir = envir, highlight = highlight)
+    lapply(x$S4_methods, print, envir = envir)
   }
   invisible(x)
 }

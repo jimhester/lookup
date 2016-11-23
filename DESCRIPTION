@@ -14,7 +14,8 @@ Imports:
     crayon,
     rex,
     methods,
-    highlite
+    highlite,
+    jsonlite
 License: MIT + file LICENSE
 LazyData: true
 Suggests:
