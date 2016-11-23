@@ -2,7 +2,7 @@ internal_source <- function(name) {
   structure(list(search = name, type = "internal", language = "c", remote_type = "internal"), class = "internal")
 }
 fetch_symbol_map.internal <- function(s, branch = "trunk") {
-  s$map_lines <- github_content(s, path = "src/main/names.c", owner = "wch", repo = "r-source", ref = branch)
+  s$map_lines <- github_content(path = "src/main/names.c", owner = "wch", repo = "r-source", ref = branch)
   s
 }
 parse_symbol_map.internal <- function(s, name = s$search, ...) {
@@ -15,7 +15,7 @@ parse_symbol_map.internal <- function(s, name = s$search, ...) {
 }
 
 source_files.internal <- function(s, name = s$search, ...) {
-  s$src_files <- github_code_search(s, s$map[name], path = "src/main", language = "c", owner = "wch", repo = "r-source")
+  s$src_files <- github_code_search(s$map[name], path = "src/main", language = "c", owner = "wch", repo = "r-source")
 
   # Ignore the names.c file
   s$src_files <- s$src_files[s$src_files != "src/main/names.c"]
@@ -23,7 +23,7 @@ source_files.internal <- function(s, name = s$search, ...) {
 }
 
 fetch_source.internal <- function(s, path, branch = "trunk") {
-  s$src_lines <- github_content(s, path = path, owner = "wch", repo = "r-source", ref = branch)
+  s$src_lines <- github_content(path = path, owner = "wch", repo = "r-source", ref = branch)
   s$src_path <- path
   s
 }

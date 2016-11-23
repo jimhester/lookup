@@ -70,3 +70,10 @@ auto_name <- function(names) {
 }
 
 gh <- memoise::memoise(gh::gh)
+
+paths <- function(...) {
+  args <- list(...)
+  args[-1] <- gsub("^[/\\]", "", args[-1])
+  args[-length(args)] <- gsub("[/\\]$", "", args[-length(args)])
+  paste(args[nzchar(args)], collapse = "/")
+}

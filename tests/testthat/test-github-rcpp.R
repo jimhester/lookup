@@ -1,8 +1,8 @@
 context("github-rcpp")
-with_github_package("tidyverse/tibble", {
-  s <- NULL
+with_github_package("jimhester/lookup/tests/testthat/TestRcpp", {
+  #s <- NULL
   test_that("fetch_symbol_map", {
-    s <<- as.source_type("tibble", "rcpp", "matrixToDataFrame")
+    s <<- as.source_type("TestRcpp", "rcpp", "add_rcpp")
     expect_equal(class(s), c("rcpp_github", "rcpp", "github"))
 
     s <<- fetch_symbol_map(s)
@@ -13,12 +13,12 @@ with_github_package("tidyverse/tibble", {
 
   test_that("parse_symbol_map", {
     s <<- parse_symbol_map(s)
-    expect_true(length(s$map) > 0)
+    expect_true(length(s$map) > 1)
   })
 
   test_that("source_files", {
     s <<- source_files(s)
-    expect_equal(basename(s$src_files), "matrixToDataFrame.cpp")
+    expect_equal(basename(s$src_files), "package.cpp")
   })
 
   test_that("fetch_source", {
@@ -35,13 +35,13 @@ with_github_package("tidyverse/tibble", {
   })
 
   test_that("lookup_function", {
-    res <- lookup_function("matrixToDataFrame", "rcpp", "tibble")
+    res <- lookup_function("add_rcpp", "rcpp", "TestRcpp")
 
     expect_true(nchar(res$content) > 0)
     expect_equal(res$remote_type, "github")
     expect_equal(res$type, "rcpp")
     expect_equal(res$language, "c++")
 
-    expect_null(lookup_function("missing", "rcpp", "tibble"))
+    expect_null(lookup_function("missing", "rcpp", "TestRcpp"))
   })
 })
