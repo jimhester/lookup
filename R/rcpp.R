@@ -56,12 +56,12 @@ fetch_symbol_map.rcpp_local <- function(s) {
 }
 
 fetch_symbol_map.rcpp_github <- function(s) {
-  s$map_lines <- github_content(s, "src/RcppExports.cpp")
+  s$map_lines <- github_content(s, "src/RcppExports.cpp", api_url = s$description$RemoteHost)
   s
 }
 
 fetch_symbol_map.rcpp_cran <- function(s) {
-  s$map_lines <- github_content(s, "src/RcppExports.cpp", owner = "cran", repo = s$description$Package, ref = s$description$Version, api_url = "https://api.github.com")
+  s$map_lines <- github_content(s, "src/RcppExports.cpp", owner = "cran", repo = s$description$Package, ref = s$description$Version)
   s
 }
 
@@ -85,7 +85,7 @@ fetch_source.local <- function(s, path) {
 
 # -- Github --
 source_files.rcpp_github <- function(s, name = s$search, ...) {
-  s$src_files <- github_code_search(s, name = name)
+  s$src_files <- github_code_search(s, name = name, api_url = s$description$RemoteHost)
 
   # Ignore the RcppExports file, not what we want
   s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
@@ -93,7 +93,7 @@ source_files.rcpp_github <- function(s, name = s$search, ...) {
 }
 
 source_files.rcpp_cran <- function(s, name = s$search, ...) {
-  s$src_files <- github_code_search(s, name = name, owner = "cran", repo = s$description$Package, api_url = "https://api.github.com")
+  s$src_files <- github_code_search(s, name = name, owner = "cran", repo = s$description$Package)
 
   # Ignore the RcppExports file, not what we want
   s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
@@ -102,10 +102,12 @@ source_files.rcpp_cran <- function(s, name = s$search, ...) {
 
 fetch_source.github <- function(s, path) {
   s$src_lines <- github_content(s, path)
+  s$src_path <- path
   s
 }
 
 fetch_source.cran <- function(s, path) {
-  s$src_lines <- github_content(s, path, owner = "cran", repo = s$description$Package, ref = s$description$Version, api_url = "https://api.github.com")
+  s$src_lines <- github_content(s, path, owner = "cran", repo = s$description$Package, ref = s$description$Version)
+  s$src_path <- path
   s
 }

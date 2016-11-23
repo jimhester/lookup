@@ -205,16 +205,3 @@ print.getAnywhere <- function(x, ...) {
   lapply(defs, print)
   invisible()
 }
-
-r_github_content <- memoise::memoise(function(path, branch = "master") {
-  readLines(paste(sep = "/", "https://raw.githubusercontent.com/wch/r-source", branch, path))
-})
-
-names_map <- function(x = r_github_content("src/main/names.c", branch = branch),
-                      branch = "master") {
-  m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]*([^,]+)", x, perl = TRUE)
-  res <- na.omit(captures(x, m))
-  setNames(res[[2]], res[[1]])
-}
-
-gh <- memoise::memoise(gh::gh)

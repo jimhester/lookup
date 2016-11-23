@@ -68,3 +68,5 @@ auto_name <- function(names) {
   names[missing] <- seq_along(names)[missing]
   names
 }
+
+gh <- memoise::memoise(gh::gh)

@@ -1,26 +1,45 @@
-parse_internal <- function(name, path) {
-  lines <- r_github_content(path)
-  start <- grep(paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", name, "\\([^)(]+)[[:space:]]*"), lines)
+internal_source <- function(name) {
+  structure(list(search = name, type = "internal", language = "c", remote_type = "internal"), class = "internal")
+}
+fetch_symbol_map.internal <- function(s, branch = "trunk") {
+  s$map_lines <- github_content(s, path = "src/main/names.c", owner = "wch", repo = "r-source", ref = branch)
+  s
+}
+parse_symbol_map.internal <- function(s, name = s$search, ...) {
+  lines <- s$map_lines
+  m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]*([^,]+)", lines, perl = TRUE)
+  res <- na.omit(captures(lines, m))
+  s$map <- setNames(res[[2]], res[[1]])
+  s$regex <- s$map[s$search]
+  s
+}
+
+source_files.internal <- function(s, name = s$search, ...) {
+  s$src_files <- github_code_search(s, s$map[name], path = "src/main", language = "c", owner = "wch", repo = "r-source")
+
+  # Ignore the names.c file
+  s$src_files <- s$src_files[s$src_files != "src/main/names.c"]
+  s
+}
+
+fetch_source.internal <- function(s, path, branch = "trunk") {
+  s$src_lines <- github_content(s, path = path, owner = "wch", repo = "r-source", ref = branch)
+  s$src_path <- path
+  s
+}
+
+parse_source.internal <- function(s, regex) {
+  lines <- s$src_lines
+  start <- grep(paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", regex, "\\([^)(]+)[[:space:]]*"), lines)
   if (length(start)) {
     length <- find_function_end(lines[seq(start, length(lines))])
     if (!is.na(length)) {
       end <- start + length - 1
-      Compiled(path = path, start = start, end = end, content = paste(lines[seq(start, end)], collapse = "\n"), type = "c")
+      s$fun_start <- start
+      s$fun_end <- end
+      s$fun_lines <- s$src_lines[seq(start, end)]
+      return(s)
     }
   }
-}
-
-internal_source <- function(x) {
-  response <- gh("/search/code", q = paste("in:file", "repo:wch/r-source", "path:src/main", "language:c", x))
-  paths <- vapply(response$items, `[[`, character(1), "path")
-  compact(lapply(paths, function(path) {
-    parse_internal(x, path)
-  }))
-}
-
-lookup_internal <- function(fun, envir = parent.frame(), ...) {
-  map <- names_map()
-  source_name <- map[fun$name]
-
-  internal_source(source_name)
+  s
 }

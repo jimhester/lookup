@@ -1,10 +1,10 @@
-fetch_symbol_map <- function(desc, ...) UseMethod("fetch_symbol_map")
-parse_symbol_map <- function(desc, ...) UseMethod("parse_symbol_map")
-source_files <- function(desc, ...) UseMethod("source_files")
-fetch_source <- function(desc, path) UseMethod("fetch_source")
-parse_source <- function(desc, search) UseMethod("parse_source")
+fetch_symbol_map <- function(s, ...) UseMethod("fetch_symbol_map") # s$map_lines
+parse_symbol_map <- function(s, ...) UseMethod("parse_symbol_map") # s$map, s$regex
+source_files <- function(s, ...) UseMethod("source_files") # s$src_files
+fetch_source <- function(s, path) UseMethod("fetch_source") # s$src_path, s$src_lines
+parse_source <- function(s, search) UseMethod("parse_source") # s$fun_start, s$fun_end, s$fun_lines
 
-as.source_type <- function(package, type, search = NULL) {
+as.source_type <- function(package, type, search = NULL) { # s$search, s$type, s$language, s$remote_type, class(s)
 
   desc <- tryCatch(packageDescription(package, lib.loc = .libPaths()), warning = function(e) { stop(as.error(e)) })
 

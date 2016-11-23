@@ -56,17 +56,6 @@ test_that("lookup for simple S3 generic works", {
   expect_identical(p1, p2)
 })
 
-test_that("names_map works properly", {
-  x <- readRDS("names.c.rds")
-  m <- names_map(x)
-
-  expect_identical(m[["identical"]], "do_identical")
-  expect_identical(m[["makeLazy"]], "do_makelazy")
-  expect_identical(m[["<="]], "do_relop")
-  expect_identical(m[["-"]], "do_arith")
-  expect_identical(m[["setEncoding"]], "do_setencoding")
-})
-
 test_that("auto_name works properly", {
   t1 <- c("one", "two")
   expect_identical(auto_name(t1), t1)
