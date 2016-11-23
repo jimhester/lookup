@@ -1,4 +1,4 @@
-# Works for all rcpp remote types
+# -- Applicable to all Rcpp types --
 parse_symbol_map.rcpp <- function(s) {
 
   lines <- s$map_lines
@@ -22,7 +22,24 @@ parse_symbol_map.rcpp <- function(s) {
   s
 }
 
-# -- local repository methods
+parse_source.rcpp <- function(s, regex) {
+
+  start <- grep(regex, s$src_lines)
+  s$fun_start <- s$fun_end <- s$fun_lines <- NULL
+  if (length(start) > 0) {
+    length <- find_function_end(s$src_lines[seq(start, length(s$src_lines))])
+    if (!is.na(length)) {
+      end <- start + length - 1
+      s$fun_start <- start
+      s$fun_end <- end
+      s$fun_lines <- s$src_lines[seq(start, end)]
+      return(s)
+    }
+  }
+  s
+}
+
+# -- local repository methods --
 fetch_symbol_map.rcpp_local <- function(s) {
   path <- s$description$RemoteUrl
 
@@ -61,30 +78,19 @@ fetch_source.local <- function(s, path) {
   s
 }
 
-parse_source.rcpp <- function(s, regex) {
-
-  start <- grep(regex, s$src_lines)
-  s$fun_start <- s$fun_end <- s$fun_lines <- NULL
-  if (length(start) > 0) {
-    length <- find_function_end(s$src_lines[seq(start, length(s$src_lines))])
-    if (!is.na(length)) {
-      end <- start + length - 1
-      s$fun_start <- start
-      s$fun_end <- end
-      s$fun_lines <- s$src_lines[seq(start, end)]
-      return(s)
-    }
-  }
-  s
-}
-
-search_package.rcpp_github <- function(s, name, ...) {
+# -- Github --
+source_files.rcpp_github <- function(s, name = s$search, ...) {
   response <- gh("/search/code", q = paste("in:file", paste0("repo:", user, "/", package), "path:src/", "language:c", "language:c++", name))
 
   s$src_files <- vapply(response$items, `[[`, character(1), "path")
 
   # Ignore the RcppExports file, not what we want
   s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
+  s
+}
+
+fetch_source.github <- function(s, path) {
+  s$src_lines <- github_content(s, path)
   s
 }
 
