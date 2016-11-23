@@ -31,8 +31,12 @@ in_map <- function(s, name) {
   !is.na(s$map[name])
 }
 
-lookup_function <- function(name, package, type) {
-  s <- as.source_type(package, type, name)
+lookup_function <- function(name, type, package = NULL) {
+  if (type == "internal") {
+    s <- internal_source(name)
+  } else {
+    s <- as.source_type(package, type, name)
+  }
 
   s <- parse_symbol_map(fetch_symbol_map(s))
   if (!in_map(s, name)) {

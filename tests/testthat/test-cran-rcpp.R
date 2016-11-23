@@ -36,13 +36,13 @@ with_cran_package("tibble", {
   })
 
   test_that("lookup_function", {
-    res <- lookup_function("matrixToDataFrame", "tibble", "rcpp")
+    res <- lookup_function("matrixToDataFrame", "rcpp", "tibble")
 
     expect_true(nchar(res$content) > 0)
     expect_equal(res$remote_type, "cran")
     expect_equal(res$type, "rcpp")
     expect_equal(res$language, "c++")
 
-    expect_null(lookup_function("missing", "tibble", "rcpp"))
+    expect_null(lookup_function("missing", "rcpp", "tibble"))
   })
 })

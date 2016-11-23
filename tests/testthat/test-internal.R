@@ -40,12 +40,10 @@ context("internal")
   })
 
   test_that("lookup_function", {
-    res <- lookup_function("matrixToDataFrame", "tibble", "rcpp")
+    res <- lookup_function("grep", "internal")
 
     expect_true(nchar(res$content) > 0)
-    expect_equal(res$remote_type, "cran")
-    expect_equal(res$type, "rcpp")
-    expect_equal(res$language, "c++")
-
-    expect_null(lookup_function("missing", "tibble", "rcpp"))
+    expect_equal(res$remote_type, "internal")
+    expect_equal(res$type, "internal")
+    expect_equal(res$language, "c")
   })

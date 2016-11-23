@@ -36,13 +36,13 @@ with_local_package("TestRcpp", {
   })
 
   test_that("lookup_function", {
-    res <- lookup_function("add_rcpp", "TestRcpp", "rcpp")
+    res <- lookup_function("add_rcpp", "rcpp", "TestRcpp")
 
     expect_true(nchar(res$content) > 0)
     expect_equal(res$remote_type, "local")
     expect_equal(res$type, "rcpp")
     expect_equal(res$language, "c++")
 
-    expect_null(lookup_function("missing", "TestRcpp", "rcpp"))
+    expect_null(lookup_function("missing", "rcpp", "TestRcpp"))
   })
 })
