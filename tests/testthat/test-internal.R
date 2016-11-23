@@ -1,6 +1,6 @@
 context("internal")
 
-  #s <- NULL
+  s <- NULL
   test_that("fetch_symbol_map", {
     s <<- internal_source("grep")
     expect_equal(class(s), "internal")

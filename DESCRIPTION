@@ -25,4 +25,16 @@ Remotes:
     local::~/p/highlite,
     gaborcsardi/debugme
 LinkingTo: Rcpp
-RoxygenNote: 5.0.1
+RoxygenNote: 5.0.1.9000
+Collate: 
+    'RcppExports.R'
+    'rcpp.R'
+    'call.R'
+    'github.R'
+    'highlight.R'
+    'internal.R'
+    'lookup.R'
+    'package.R'
+    'registered_routines.R'
+    'utils.R'
+    'zzz.R'

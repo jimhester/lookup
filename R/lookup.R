@@ -21,6 +21,7 @@ as.source_type <- function(package, type, search = NULL) { # s$search, s$type, s
   remote_type <- desc$RemoteType %||% "unknown"
   language <- switch(type,
     rcpp = "c++",
+    call = "c",
     type)
 
   structure(list(description = desc, search = search, type = type, language = language, remote_type = remote_type),

@@ -1,6 +1,8 @@
 #' @importFrom methods .S4methods getMethod isGeneric
 #' @importFrom stats na.omit setNames
 #' @importFrom utils .S3methods capture.output getS3method packageDescription
+#' @useDynLib lookup
+#' @importFrom Rcpp sourceCpp
 NULL
 
 as_lookup <- function(x, envir = parent.frame(), ...) {
