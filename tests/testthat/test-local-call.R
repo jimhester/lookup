@@ -21,7 +21,7 @@ test_that("call_name works", {
 with_local_package("TestRcpp", {
   context("local-call")
 
-  #s <- NULL
+  s <- NULL
   test_that("fetch_symbol_map", {
     s <<- as.source_type("TestRcpp", "call", "add_call_impl")
     expect_equal(class(s), c("call_local", "call", "local"))
