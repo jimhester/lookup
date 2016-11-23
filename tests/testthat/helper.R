@@ -28,5 +28,4 @@ with_github_package <- with_package(devtools::install_github, quiet = TRUE)
 
 # Counter is used if server state has changed (PUT, POST etc)
 .counter <- 0
-gh <<- memoise::memoise(environment(gh)[["_f"]], cache = memoise::cache_filesystem(".cache"), ~ .counter)
-r_github_content <<- memoise::memoise(environment(r_github_content)[["_f"]], cache = memoise::cache_filesystem(".cache"), ~ .counter)
+testthat:::set_mock(list(name = as.symbol("gh"), env = asNamespace("lookup"), target_value = gh, new_value = memoise::memoise(environment(gh)[["_f"]], cache = memoise::cache_filesystem(".cache"), ~ .counter)))
