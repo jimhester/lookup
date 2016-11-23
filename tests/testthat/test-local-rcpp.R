@@ -1,9 +1,11 @@
 with_local_package("TestRcpp", {
   context("local-rcpp")
 
-  #s <- NULL
+  s <- NULL
   test_that("fetch_symbol_map", {
     s <<- as.source_type("TestRcpp", "rcpp", "add_rcpp")
+    expect_equal(class(s), c("rcpp_local", "rcpp", "local"))
+
     s <<- fetch_symbol_map(s)
     expect_true(length(s$map_lines) > 1)
 
@@ -40,5 +42,7 @@ with_local_package("TestRcpp", {
     expect_equal(res$remote_type, "local")
     expect_equal(res$type, "rcpp")
     expect_equal(res$language, "c++")
+
+    expect_null(lookup_function("missing", "TestRcpp", "rcpp"))
   })
 })

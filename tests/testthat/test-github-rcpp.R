@@ -3,6 +3,8 @@ with_github_package("tidyverse/tibble", {
   s <- NULL
   test_that("fetch_symbol_map", {
     s <<- as.source_type("tibble", "rcpp", "matrixToDataFrame")
+    expect_equal(class(s), c("rcpp_github", "rcpp", "github"))
+
     s <<- fetch_symbol_map(s)
     expect_true(length(s$map_lines) > 1)
 

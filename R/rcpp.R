@@ -60,6 +60,11 @@ fetch_symbol_map.rcpp_github <- function(s) {
   s
 }
 
+fetch_symbol_map.rcpp_cran <- function(s) {
+  s$map_lines <- github_content(s, "src/RcppExports.cpp", owner = "cran", repo = s$description$Package, ref = s$description$Version, api_url = "https://api.github.com")
+  s
+}
+
 source_files.rcpp_local <- function(s, ...) {
   path <- s$description$RemoteUrl
   s$src_files <- list.files(file.path(path, "src"),
@@ -80,9 +85,15 @@ fetch_source.local <- function(s, path) {
 
 # -- Github --
 source_files.rcpp_github <- function(s, name = s$search, ...) {
-  response <- gh("/search/code", q = paste("in:file", paste0("repo:", user, "/", package), "path:src/", "language:c", "language:c++", name))
+  s$src_files <- github_code_search(s, name = name)
 
-  s$src_files <- vapply(response$items, `[[`, character(1), "path")
+  # Ignore the RcppExports file, not what we want
+  s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
+  s
+}
+
+source_files.rcpp_cran <- function(s, name = s$search, ...) {
+  s$src_files <- github_code_search(s, name = name, owner = "cran", repo = s$description$Package, api_url = "https://api.github.com")
 
   # Ignore the RcppExports file, not what we want
   s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
@@ -91,6 +102,11 @@ source_files.rcpp_github <- function(s, name = s$search, ...) {
 
 fetch_source.github <- function(s, path) {
   s$src_lines <- github_content(s, path)
+  s
+}
+
+fetch_source.cran <- function(s, path) {
+  s$src_lines <- github_content(s, path, owner = "cran", repo = s$description$Package, ref = s$description$Version, api_url = "https://api.github.com")
   s
 }
 
