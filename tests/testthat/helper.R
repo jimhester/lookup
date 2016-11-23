@@ -30,4 +30,3 @@ with_github_package <- with_package(devtools::install_github, quiet = TRUE)
 .counter <- 0
 gh <<- memoise::memoise(environment(gh)[["_f"]], cache = memoise::cache_filesystem(".cache"), ~ .counter)
 r_github_content <<- memoise::memoise(environment(r_github_content)[["_f"]], cache = memoise::cache_filesystem(".cache"), ~ .counter)
-package_github_content <<- memoise::memoise(environment(package_github_content)[["_f"]], cache = memoise::cache_filesystem(".cache"), ~ .counter)

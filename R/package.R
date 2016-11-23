@@ -218,17 +218,3 @@ names_map <- function(x = r_github_content("src/main/names.c", branch = branch),
 }
 
 gh <- memoise::memoise(gh::gh)
-
-package_source_definition <- function(package, x) {
-  response <- gh("/search/code", q = paste("in:file", paste0("repo:cran/", package), "path:src/", "language:c", "language:c++", x))
-  paths <- vapply(response$items, `[[`, character(1), "path")
-  regex <- rcpp_symbol_map_cran(x, package)[x]
-  if (any(is.na(regex))) {
-    return()
-  }
-  compact(lapply(paths, function(path) {
-      if (!grepl("RcppExports\\.cpp", path)) {
-        find_cpp_function(regex, package_github_content(package, path), path)
-      }
-  }))
-}
