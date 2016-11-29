@@ -28,16 +28,18 @@ parse_symbol_map.rcpp <- function(s) {
 }
 
 parse_source.rcpp <- function(s, regex) {
-
-  start <- grep(regex, s$src_lines)
   s$fun_start <- s$fun_end <- s$fun_lines <- NULL
+
+  new_lines <- cumsum(nchar(s$src_lines) + 1)
+  lines <- paste(s$src_lines, collapse = "\n")
+
+  start <- regexpr(regex, lines)
   if (length(start) > 0) {
-    length <- find_function_end(s$src_lines[seq(start, length(s$src_lines))])
-    if (!is.na(length)) {
-      end <- start + length - 1
-      s$fun_start <- start
-      s$fun_end <- end
-      s$fun_lines <- s$src_lines[seq(start, end)]
+    end <- find_function_end(lines, start)
+    if (!is.na(end)) {
+      s$fun_start <- tail(which(new_lines <= start), n = 1L) + 1L
+      s$fun_end <- head(which(new_lines >= end), n = 1L) - 1L
+      s$fun_lines <- s$src_lines[seq(s$fun_start, s$fun_end)]
       return(s)
     }
   }
