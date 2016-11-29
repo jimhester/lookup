@@ -96,26 +96,22 @@ parse_name <- function(x) {
 }
 
 lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
-  if (has_call(fun$def, ".Internal")) {
-    fun$internal <- lookup_function(list(name = call_name(fun$def, ".Internal")), "internal")
+  fun$internal <- lapply(call_names(fun$def, type = ".Internal", subset = c(2, 1)), lookup_function, type = "internal")
+  fun$ccall <- lapply(call_names(fun$def, type = ".Call", subset = c(2, 1)), lookup_function, type = "call", package = fun$package)
+  if (uses_rcpp(fun$package)) {
+    rcpp_exports <- rcpp_exports(fun$package)
+    fun$ccall <- lapply(call_names(fun$def, type = rcpp_exports, subset = c(1)), lookup_function, type = "rcpp", package = fun$package)
   }
-  if (has_call(fun$def, ".Call")) {
-    if (uses_rcpp(fun$package)) {
-      fun$ccall <- lookup_function(call_name(fun$def, ".Call"), "rcpp", fun$package)
-    }
-    if (is.null(fun$ccall)) {
-      fun$ccall <- lookup_function(call_name(fun$def, ".Call"), "call", fun$package)
-    }
-  }
-  if (pryr::is_s3_method(fun$name)) {
+  if (pryr::is_s3_method(fun$name, env = envir)) {
     fun$type <- append(fun$type, "S3 method", 0)
   }
-  if (pryr::is_s3_generic(fun$name)) {
+  if (pryr::is_s3_generic(fun$name, env = envir)) {
+    browser()
     fun$type <- append(fun$type, "S3 generic", 0)
     fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
   }
   if (isS4(fun$def)) {
-    if (isGeneric(fun$name)) {
+    if (isGeneric(fun$name, where = envir)) {
       fun$type <- append(fun$type, "S4 generic", 0)
       fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
     } else {
@@ -156,18 +152,10 @@ print.lookup <- function(x, envir = parent.frame(), ...) {
 
   cat(crayon::bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
   cat(highlight_output(base::print.function(x$def), language = "r"), sep = "\n")
-  if (!is.null(x$internal)) {
-    lapply(x$internal, print, envir = envir)
-  }
-  if (!is.null(x$ccall)) {
-    lapply(x$ccall, print, envir = envir)
-  }
-  if (!is.null(x$S3_methods)) {
-    lapply(x$S3_methods, print, envir = envir)
-  }
-  if (!is.null(x$S4_methods)) {
-    lapply(x$S4_methods, print, envir = envir)
-  }
+  lapply(x[["internal"]], print, envir = envir)
+  lapply(x[["ccall"]], print, envir = envir)
+  lapply(x[["S3_methods"]], print, envir = envir)
+  lapply(x[["S4_methods"]], print, envir = envir)
   invisible(x)
 }
 
