@@ -15,7 +15,6 @@ List parse_array_definition(std::string x) {
 
   int brace_level = 0;
 
-  std::string::const_iterator i = x.begin();
   std::string word;
 
   states state = ARG;
@@ -80,37 +79,32 @@ List parse_array_definition(std::string x) {
 // This returns the line number the end is on
 
 // [[Rcpp::export]]
-IntegerVector find_function_end(const CharacterVector& x) {
+int find_function_end(const CharacterVector& x, int start = 0) {
   int brace_level = 0;
-  int out = 0;
-  while (out < x.length()) {
-    std::string line = as<std::string>(x[out]);
-    std::string::const_iterator i = line.begin();
-
-    // Find first brace
-    if (brace_level == 0) {
-      while(*i != '{' && i != line.end()) {
-        ++i;
-      }
+  std::string line = as<std::string>(x[0]);
+  int i = start;
+  // Find first opening brace
+  if (brace_level == 0) {
+    while(i < line.size() && line[i] != '{') {
+      ++i;
     }
-
-    for(;i != line.end(); ++i) {
-      if (*i == '/') {
-        if (*(i + 1) == '/') {
-          continue;
-        }
-      }
-      if (*i == '{') {
-        ++brace_level;
-      }
-      if (*i == '}') {
-        --brace_level;
-      }
-      if (brace_level == 0) {
-        return IntegerVector(1, out + 1);
-      }
-    }
-    ++out;
   }
-  return IntegerVector(1, NA_INTEGER);
+  for(;i < line.size();++i) {
+    if (line[i] == '/') {
+      if (i + 1 < line.size() && line[i + 1] == '/') {
+        continue;
+      }
+    }
+    if (line[i] == '{') {
+      ++brace_level;
+    }
+    if (line[i] == '}') {
+      --brace_level;
+    }
+    if (brace_level == 0) {
+      // R is 1 based, so add 1
+      return i + 1;
+    }
+  }
+  return NA_INTEGER;
 }

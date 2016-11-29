@@ -17,13 +17,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // find_function_end
-IntegerVector find_function_end(const CharacterVector& x);
-RcppExport SEXP lookup_find_function_end(SEXP xSEXP) {
+int find_function_end(const CharacterVector& x, int start);
+RcppExport SEXP lookup_find_function_end(SEXP xSEXP, SEXP startSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(find_function_end(x));
+    Rcpp::traits::input_parameter< int >::type start(startSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_function_end(x, start));
     return rcpp_result_gen;
 END_RCPP
 }

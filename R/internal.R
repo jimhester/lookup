@@ -29,15 +29,15 @@ fetch_source.internal <- function(s, path, branch = "trunk") {
 }
 
 parse_source.internal <- function(s, regex) {
-  lines <- s$src_lines
-  start <- grep(paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", regex, "\\([^)(]+)[[:space:]]*"), lines)
+  new_lines <- cumsum(nchar(s$src_lines) + 1)
+  lines <- paste(s$src_lines, collapse = "\n")
+  start <- regexpr(paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", regex, "\\([^)(]+\\)[[:space:]]*\\{"), lines)
   if (length(start)) {
-    length <- find_function_end(lines[seq(start, length(lines))])
-    if (!is.na(length)) {
-      end <- start + length - 1
-      s$fun_start <- start
-      s$fun_end <- end
-      s$fun_lines <- s$src_lines[seq(start, end)]
+    end <- find_function_end(lines, start)
+    if (!is.na(end)) {
+      s$fun_start <- tail(which(new_lines <= start), n = 1L) + 1L
+      s$fun_end <- head(which(new_lines >= end), n = 1L) - 1L
+      s$fun_lines <- substr(lines, start, end)
       return(s)
     }
   }

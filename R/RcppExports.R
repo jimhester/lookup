@@ -5,7 +5,7 @@ parse_array_definition <- function(x) {
     .Call('lookup_parse_array_definition', PACKAGE = 'lookup', x)
 }
 
-find_function_end <- function(x) {
-    .Call('lookup_find_function_end', PACKAGE = 'lookup', x)
+find_function_end <- function(x, start = 0L) {
+    .Call('lookup_find_function_end', PACKAGE = 'lookup', x, start)
 }
 
