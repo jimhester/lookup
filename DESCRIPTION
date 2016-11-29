@@ -21,7 +21,9 @@ LazyData: true
 Suggests:
     testthat,
     xml2,
-    debugme
+    debugme,
+    fasttime,
+    tibble
 Remotes:
     local::~/p/highlite,
     gaborcsardi/debugme
