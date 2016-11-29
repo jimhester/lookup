@@ -70,7 +70,7 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.f
   switch(fun$type,
          closure = lookup_closure(fun, envir = envir, all = all, ...),
          special =,
-         builtin = lookup_function(fun, "internal"),
+         builtin = lookup_function(fun$name, "internal"),
          stop("Function of type: ", fun$type, " not supported!", call. = FALSE))
 }
 
