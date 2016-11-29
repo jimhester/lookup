@@ -131,11 +131,11 @@ lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
 
 lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
-  S3_methods <- .S3methods(f$name, envir = envir)
+  S3_methods <- utils::.S3methods(f$name, envir = envir)
 
-  classes <- sub(paste0(escape(f$name), "."), "", S3_methods)
+  classes <- sub(paste0(escape(f$name), "[.]"), "", as.character(S3_methods))
 
-  lapply(classes, function(class) lookup(getS3method(f$name, class), name = f$name))
+  lapply(classes, function(class) lookup(getS3method(f$name, class, envir = envir), name = f$name))
 }
 
 lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
