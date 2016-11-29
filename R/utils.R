@@ -4,7 +4,7 @@ regex_escape <- function(x) {
 }
 
 uses_rcpp <- function(pkg) {
-  grepl("\\bRcpp\\b", perl = TRUE, packageDescription(pkg)$LinkingTo)
+  grepl("\\bRcpp\\b", perl = TRUE, tryCatch(packageDescription(pkg)$LinkingTo, warning = function(e) NULL) %||% FALSE)
 }
 
 upper <- function(x) {
@@ -72,8 +72,28 @@ auto_name <- function(names) {
 gh <- memoise::memoise(gh::gh)
 
 paths <- function(...) {
-  args <- list(...)
+  args <- compact(list(...))
   args[-1] <- gsub("^[/\\]", "", args[-1])
   args[-length(args)] <- gsub("[/\\]$", "", args[-length(args)])
   paste(args[nzchar(args)], collapse = "/")
+}
+
+# any function using unlist or c was dropping the classnames,
+# so need to brute force copy the objects
+flatten_list <- function(x, class) {
+
+  res <- list()
+  itr <- 1L
+  assign_item <- function(x) {
+    if (inherits(x, class)) {
+      res[[itr]] <<- x
+      itr <<- itr + 1L
+    }
+    else if (is.list(x)) {
+      lapply(x, assign_item)
+    }
+  }
+  assign_item(x)
+  res
+
 }

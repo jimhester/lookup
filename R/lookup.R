@@ -59,26 +59,27 @@ lookup_function <- function(name, type, package = NULL) {
   }
 }
 
-call_name <- function(f, type) {
-  type <- as.symbol(type)
+call_names <- function(f, type, subset) {
+  calls <- character()
+  i <- 0
 
   call_calls <- function(x) {
     if (is.name(x) || is.atomic(x)) {
       return(NULL)
     }
-    if (identical(x[[1]], type)) {
-      return(x)
-    }
-    for (i in rev(seq_along(x))) {
-      ccall <- call_calls(x[[i]])
-      if (!is.null(ccall)) {
-        return(ccall)
+    if (is.call(x)) {
+      if(as.character(x[[1]])[[1]] %in% type) {
+        calls[[i <<- i + 1]] <<- as.character(x[[subset]])
       }
+    }
+    for (i in seq_along(x)) {
+      call_calls(x[[i]])
     }
     NULL
   }
-  call <- call_calls(body(f))
-  as.character(call[[2]][[1]])
+  call_calls(body(f))
+
+  calls
 }
 
 has_call <- function(f, type) {

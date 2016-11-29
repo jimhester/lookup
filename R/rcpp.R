@@ -1,3 +1,8 @@
+rcpp_exports <- function(package) {
+  s <- as.source_type(package, "rcpp")
+  names(parse_symbol_map(fetch_symbol_map(s))$map)
+}
+
 # -- Applicable to all Rcpp types --
 parse_symbol_map.rcpp <- function(s) {
 

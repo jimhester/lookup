@@ -11,11 +11,11 @@ test_that("has_call works", {
 })
 
 test_that("call_name works", {
-  expect_equal(call_name(identical, "wrong"), character(0))
+  expect_equal(call_names(identical, "wrong"), character(0))
 
-  expect_equal(call_name(identical, ".Internal"), "identical")
+  expect_equal(call_names(identical, ".Internal", c(2, 1)), "identical")
 
-  expect_equal(call_name(print.default, ".Internal"), "print.default")
+  expect_equal(call_names(print.default, ".Internal", c(2, 1)), "print.default")
 })
 
 with_local_package("TestRcpp", {

@@ -24,6 +24,25 @@ as_lookup.character <- function(x, envir = parent.frame(), ...) {
   res
 }
 
+as_lookup.getAnywhere <- function(x, ...) {
+
+  # getAnywhere can return multiple definitions with the same name in different namespaces
+  lapply(which(!x$dups), function(idx) {
+    package <- sub("^registered S3 method for \\w+ from namespace (\\w+)", "\\1", x$where[[idx]])
+    package <- sub("^namespace:", "", package)
+    package <- sub("^package:", "", package)
+    def <- x$objs[[idx]]
+    structure(
+      list(
+        package = package,
+        name = x$name,
+        def = def,
+        type = typeof(def),
+        visible = x$visible[[idx]]),
+      class = "lookup")
+  })
+}
+
 function_package <- function(x) {
   if (is.primitive(x)) {
     return("base")
@@ -67,11 +86,32 @@ as_lookup.function <- function(x, envir = parent.frame(), name = substitute(x)) 
 lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.frame(), all = FALSE, ...) {
   fun <- as_lookup(x, envir = envir, name = name)
 
-  switch(fun$type,
-         closure = lookup_closure(fun, envir = envir, all = all, ...),
-         special =,
-         builtin = lookup_function(fun$name, "internal"),
-         stop("Function of type: ", fun$type, " not supported!", call. = FALSE))
+  if (fun$type %in% c("builtin", "special")) {
+    fun$internal <- list(lookup_function(fun$name, type = "internal"))
+  } else {
+    fun$internal <- lapply(call_names(fun$def, type = ".Internal", subset = c(2, 1)), lookup_function, type = "internal")
+    fun$ccall <- lapply(call_names(fun$def, type = ".Call", subset = c(2, 1)), lookup_function, type = "call", package = fun$package)
+  }
+  if (uses_rcpp(fun$package)) {
+    rcpp_exports <- rcpp_exports(fun$package)
+    fun$ccall <- lapply(call_names(fun$def, type = rcpp_exports, subset = c(1)), lookup_function, type = "rcpp", package = fun$package)
+  }
+  if (pryr::is_s3_method(fun$name, env = envir)) {
+    fun$type <- append(fun$type, "S3 method", 0)
+  }
+  if (pryr::is_s3_generic(fun$name, env = envir)) {
+    fun$type <- append(fun$type, "S3 generic", 0)
+    fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
+  }
+  if (isS4(fun$def)) {
+    if (isGeneric(fun$name, where = envir)) {
+      fun$type <- append(fun$type, "S4 generic", 0)
+      fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
+    } else {
+      fun$type <- append(fun$type, "S4 method")
+    }
+  }
+  fun
 }
 
 loaded_functions <- memoise::memoise(function(envs = loadedNamespaces()) {
@@ -94,44 +134,15 @@ parse_name <- function(x) {
          name = split[[1]])
   }
 }
-
-lookup_closure <- function(fun, envir = parent.frame(), all = FALSE, ...) {
-  fun$internal <- lapply(call_names(fun$def, type = ".Internal", subset = c(2, 1)), lookup_function, type = "internal")
-  fun$ccall <- lapply(call_names(fun$def, type = ".Call", subset = c(2, 1)), lookup_function, type = "call", package = fun$package)
-  if (uses_rcpp(fun$package)) {
-    rcpp_exports <- rcpp_exports(fun$package)
-    fun$ccall <- lapply(call_names(fun$def, type = rcpp_exports, subset = c(1)), lookup_function, type = "rcpp", package = fun$package)
-  }
-  if (pryr::is_s3_method(fun$name, env = envir)) {
-    fun$type <- append(fun$type, "S3 method", 0)
-  }
-  if (pryr::is_s3_generic(fun$name, env = envir)) {
-    browser()
-    fun$type <- append(fun$type, "S3 generic", 0)
-    fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
-  }
-  if (isS4(fun$def)) {
-    if (isGeneric(fun$name, where = envir)) {
-      fun$type <- append(fun$type, "S4 generic", 0)
-      fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
-    } else {
-      fun$type <- append(fun$type, "S4 method")
-    }
-  }
-  fun
-}
-
 `%==%` <- function(x, y) {
   identical(x, as.name(y))
 }
 
 lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
-  S3_methods <- utils::.S3methods(f$name, envir = envir)
+  S3_methods <- suppressWarnings(utils::.S3methods(f$name, envir = envir))
 
-  classes <- sub(paste0(escape(f$name), "[.]"), "", as.character(S3_methods))
-
-  lapply(classes, function(class) lookup(getS3method(f$name, class, envir = envir), name = f$name))
+  flatten_list(lapply(S3_methods, function(name) lapply(as_lookup(getAnywhere(name)), lookup)), "lookup")
 }
 
 lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
