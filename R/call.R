@@ -19,6 +19,21 @@ fetch_symbol_map.call_local <- function(s, ...) {
   s
 }
 
+fetch_symbol_map.call_github <- function(s) {
+  res <- github_content(
+    path = paths(s$description$RemoteSubdir, "NAMESPACE"),
+    owner = s$description$RemoteUsername,
+    repo = s$description$RemoteRepo,
+    ref = s$description$RemoteRef,
+    api_url = s$descripiton$RemoteHost)
+  temp_dir <- tempfile()
+  dir.create(temp_dir)
+  temp_file <- file.path(temp_dir, "NAMESPACE")
+  writeLines(res, con = temp_file)
+  s$map_lines <- parseNamespaceFile(basename(temp_dir), dirname(temp_dir))
+  s
+}
+
 source_files.call_local <-  function(s, ...) {
   path <- s$description$RemoteUrl
   s$src_files <- list.files(file.path(path, "src"),
@@ -28,6 +43,18 @@ source_files.call_local <-  function(s, ...) {
     full.names = FALSE)
 
   s$src_files <- file.path("src", s$src_files)
+  s
+}
+
+source_files.call_github <- function(s, name = s$search, ...) {
+  s$src_files <- github_code_search(
+    name = name,
+    path = paths(s$description$RemoteSubdir, "src"),
+    owner = s$description$RemoteUsername,
+    repo = s$description$RemoteRepo,
+    language = "c",
+    api_url = s$description$RemoteHost)
+
   s
 }
 

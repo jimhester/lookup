@@ -14,7 +14,9 @@ as.source_type <- function(package, type, search = NULL) { # s$search, s$type, s
     desc$RemoteUrl <- dirname(package)
   }
 
-  if (desc$Repository %==% "CRAN") {
+  if (desc$Priority %==% "base") {
+    desc$RemoteType <- "base"
+  } else if (desc$Repository %==% "CRAN") {
     desc$RemoteType <- "cran"
   }
 

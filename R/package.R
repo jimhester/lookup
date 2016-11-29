@@ -90,6 +90,7 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.f
     fun$internal <- list(lookup_function(fun$name, type = "internal"))
   } else {
     fun$internal <- lapply(call_names(fun$def, type = ".Internal", subset = c(2, 1)), lookup_function, type = "internal")
+    fun$internal <- c(fun$internal, lapply(call_names(fun$def, type = ".External", subset = c(2)), lookup_function, type = "call", package = fun$package))
     fun$ccall <- lapply(call_names(fun$def, type = ".Call", subset = c(2, 1)), lookup_function, type = "call", package = fun$package)
   }
   if (uses_rcpp(fun$package)) {
