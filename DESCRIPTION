@@ -23,7 +23,8 @@ Suggests:
     xml2,
     fasttime,
     tibble,
-    lassoshooting
+    lassoshooting,
+    devtools
 Remotes:
     jimhester/highlite,
     gaborcsardi/gh,
