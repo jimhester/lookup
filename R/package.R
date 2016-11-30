@@ -47,27 +47,19 @@ function_package <- function(x) {
   if (is.primitive(x)) {
     return("base")
   }
-  e <- environment(x)
+  e <- topenv(environment(x))
   nme <- environmentName(e)
-  while(!(nzchar(nme) || identical(e, baseenv()))) {
-    e <- parent.env(e)
-    nme <- environmentName(e)
-  }
   if (!nzchar(nme)) {
     stop("Could not find associated package", call. = FALSE)
   }
   nme
 }
 
-as_lookup.function <- function(x, envir = parent.frame(), name = substitute(x)) {
+as_lookup.function <- function(x, envir = environment(x), name = substitute(x)) {
   res <- list(def = x)
 
   res$package <- function_package(res$def)
-  if (is.primitive(res$def)) {
-    env <- baseenv()
-  } else {
-    env <- environment(res$def)
-  }
+  env <- topenv(envir)
   res$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(env))
   res$type <- typeof(res$def)
   res$visible <- is_visible(res$name)
