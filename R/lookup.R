@@ -7,7 +7,7 @@ source_files <- function(s, ...) UseMethod("source_files") # s$src_files
 fetch_source <- function(s, path) UseMethod("fetch_source") # s$src_path, s$src_lines
 parse_source <- function(s, search) UseMethod("parse_source") # s$fun_start, s$fun_end, s$fun_lines
 
-as.source_type <- function(package, type, search = NULL) { # s$search, s$type, s$language, s$remote_type, class(s)
+as.source_type <- function(package, type, name = NULL) { # s$search, s$type, s$language, s$remote_type, class(s)
 
   desc <- tryCatch(packageDescription(package, lib.loc = .libPaths()), warning = function(e) { stop(as.error(e)) })
 
@@ -31,7 +31,7 @@ as.source_type <- function(package, type, search = NULL) { # s$search, s$type, s
     call = "c",
     type)
 
-  structure(list(description = desc, search = search, type = type, language = language, remote_type = remote_type),
+  structure(list(description = desc, name = name, type = type, language = language, remote_type = remote_type),
       class = c(paste0(type, "_", remote_type), type, remote_type))
 }
 
@@ -51,9 +51,9 @@ lookup_function <- function(name, type, package = NULL) {
     return()
   }
 
-  s <- source_files(s)
+  s <- source_files(s, s$search)
   for (path in s$src_files) {
-    s <- parse_source(fetch_source(s, path), s$map[name])
+    s <- parse_source(fetch_source(s, path), s$regex)
     if (!is.null(s$fun_lines)) {
       return(Compiled(path = s$src_path,
           start = s$fun_start,

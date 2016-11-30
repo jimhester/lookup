@@ -4,6 +4,7 @@ rcpp_exports <- function(package) {
 }
 
 # -- Applicable to all Rcpp types --
+generate_function_regex <- function(name) { }
 parse_symbol_map.rcpp <- function(s) {
 
   lines <- s$map_lines
@@ -23,11 +24,12 @@ parse_symbol_map.rcpp <- function(s) {
   declarations <- gsub("(\\\\?[,)])", "[^,)]*\\1", declarations)
 
   s$map <- setNames(declarations, comments)
-  s$regex <- s$map[s$search]
+  s$regex <- s$map[s$name]
+  s$search <- s$name
   s
 }
 
-parse_source.rcpp <- function(s, regex) {
+parse_source.rcpp <- function(s, regex = s$regex) {
   s$fun_start <- s$fun_end <- s$fun_lines <- NULL
 
   new_lines <- cumsum(nchar(s$src_lines) + 1)

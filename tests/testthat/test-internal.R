@@ -32,7 +32,7 @@ context("internal")
   })
 
   test_that("parse_source", {
-    s <<- parse_source(s, s$map[s$search])
+    s <<- parse_source(s)
     expect_true(length(s$fun_lines) > 1)
 
     expect_true(s$fun_start > 1)
@@ -41,6 +41,15 @@ context("internal")
 
   test_that("lookup_function", {
     res <- lookup_function("grep", "internal")
+
+    expect_true(nchar(res$content) > 0)
+    expect_equal(res$remote_type, "internal")
+    expect_equal(res$type, "internal")
+    expect_equal(res$language, "c")
+  })
+
+  test_that("lookup_function with completely different mapped name", {
+    res <- lookup_function("getLoadedDLLs", "internal")
 
     expect_true(nchar(res$content) > 0)
     expect_equal(res$remote_type, "internal")

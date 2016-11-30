@@ -48,7 +48,7 @@ with_local_package("TestRcpp", {
   })
 
   test_that("parse_source", {
-    s <<- parse_source(s, s$map[s$search])
+    s <<- parse_source(s)
     expect_true(length(s$fun_lines) > 1)
 
     expect_true(s$fun_start > 1)

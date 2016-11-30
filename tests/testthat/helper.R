@@ -28,5 +28,5 @@ with_github_package <- with_package(devtools::install_github, quiet = TRUE)
 
 # Counter is used if server state has changed (PUT, POST etc)
 # counter <- 0
-gh_mock <- testthat:::mock(name = "gh", env = asNamespace("lookup"), new = memoise::memoise(environment(gh)[["_f"]], cache = memoise::cache_filesystem(".cache")))
-testthat:::set_mock(gh_mock)
+#gh_mock <- testthat:::mock(name = "gh", env = asNamespace("lookup"), new = memoise::memoise(environment(gh)[["_f"]], cache = memoise::cache_filesystem(".cache")))
+#testthat:::set_mock(gh_mock)

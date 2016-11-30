@@ -4,27 +4,24 @@ NULL
 parse_symbol_map.call <- function(s) {
   native_routines <- s$map_lines$nativeRoutines
   if (length(native_routines) == 0) {
-    s$map <- setNames(s$search, s$search)
+    s$map <- setNames(s$name, s$name)
   } else if (isTRUE(native_routines[[1]]$useRegistration)) {
-    vals <- s$search
+    vals <- s$name
     if (length(native_routines[[1]]$registrationFixes) > 0) {
       vals <- sub(paste0("^", native_routines[[1]]$registrationFixes[[1]]), native_routines[[1]]$registrationFixes[[2]], vals)
     }
-    s$map <- setNames(vals, s$search)
+    s$map <- setNames(vals, s$name)
   } else {
     s$map <- s$map_lines$nativeRoutines[[1]]$symbolNames
   }
 
-  s$regex <- s$map[s$search]
+  s$search <- s$map[s$name]
 
-  # modify the search to look for new name
-  s$search <- s$regex
+  s$regex <- paste0("[[:space:]]+", s$search, "\\([^)]+\\)[^;]*(?:$|\\{)")
   s
 }
 
-parse_source.call <- function(s, regex) {
-  parse_source.rcpp(s, paste0("[[:space:]]+", regex, "\\([^)]+\\)[^;]*(?:$|\\{)"))
-}
+parse_source.call <- parse_source.rcpp
 
 fetch_symbol_map.call <- function(s, ...) {
   res <- parseNamespaceFile(s$description$Package, dirname(getNamespaceInfo(s$description$Package, "path")), mustExist = FALSE)
