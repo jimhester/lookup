@@ -23,16 +23,18 @@ Suggests:
     xml2,
     debugme,
     fasttime,
-    tibble
+    tibble,
+    lassoshooting
 Remotes:
     local::~/p/highlite,
     gaborcsardi/debugme
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1.9000
-Collate:
+Collate: 
     'RcppExports.R'
     'rcpp.R'
     'call.R'
+    'external.R'
     'github.R'
     'highlight.R'
     'internal.R'

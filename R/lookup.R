@@ -23,6 +23,8 @@ as.source_type <- function(package, type, search = NULL) { # s$search, s$type, s
   remote_type <- desc$RemoteType %||% "unknown"
   language <- switch(type,
     rcpp = "c++",
+    external =,
+    internal =,
     call = "c",
     type)
 
@@ -46,7 +48,7 @@ lookup_function <- function(name, type, package = NULL) {
     return()
   }
 
-  s <- source_files(s, name)
+  s <- source_files(s)
   for (path in s$src_files) {
     s <- parse_source(fetch_source(s, path), s$map[name])
     if (!is.null(s$fun_lines)) {

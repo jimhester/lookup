@@ -147,3 +147,13 @@ fetch_source.cran <- function(s, path) {
   s$src_path <- path
   s
 }
+
+fetch_source.base <- function(s, path) {
+  s$src_lines <- github_content(
+    path,
+    owner = "wch",
+    repo = "r-source")
+
+  s$src_path <- path
+  s
+}

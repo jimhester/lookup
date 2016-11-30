@@ -90,7 +90,7 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.f
     fun$internal <- list(lookup_function(fun$name, type = "internal"))
   } else {
     fun$internal <- lapply(call_names(fun$def, type = ".Internal", subset = c(2, 1)), lookup_function, type = "internal")
-    fun$internal <- c(fun$internal, lapply(call_names(fun$def, type = ".External", subset = c(2)), lookup_function, type = "call", package = fun$package))
+    fun$external <- lapply(call_names(fun$def, type = ".External", subset = c(2)), lookup_function, type = "external", package = fun$package)
     fun$ccall <- lapply(call_names(fun$def, type = ".Call", subset = c(2, 1)), lookup_function, type = "call", package = fun$package)
   }
   if (uses_rcpp(fun$package)) {
@@ -165,6 +165,7 @@ print.lookup <- function(x, envir = parent.frame(), ...) {
   cat(crayon::bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
   cat(highlight_output(base::print.function(x$def), language = "r"), sep = "\n")
   lapply(x[["internal"]], print, envir = envir)
+  lapply(x[["external"]], print, envir = envir)
   lapply(x[["ccall"]], print, envir = envir)
   lapply(x[["S3_methods"]], print, envir = envir)
   lapply(x[["S4_methods"]], print, envir = envir)

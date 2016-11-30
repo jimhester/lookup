@@ -1,12 +1,24 @@
 #' @include rcpp.R
+NULL
+
 parse_symbol_map.call <- function(s) {
-  if (length(s$map_lines$nativeRoutines) == 0) {
+  native_routines <- s$map_lines$nativeRoutines
+  if (length(native_routines) == 0) {
     s$map <- setNames(s$search, s$search)
+  } else if (isTRUE(native_routines[[1]]$useRegistration)) {
+    vals <- s$search
+    if (length(native_routines[[1]]$registrationFixes) > 0) {
+      vals <- sub(paste0("^", native_routines[[1]]$registrationFixes[[1]]), native_routines[[1]]$registrationFixes[[2]], vals)
+    }
+    s$map <- setNames(vals, s$search)
   } else {
     s$map <- s$map_lines$nativeRoutines[[1]]$symbolNames
   }
 
   s$regex <- s$map[s$search]
+
+  # modify the search to look for new name
+  s$search <- s$regex
   s
 }
 
@@ -14,45 +26,10 @@ parse_source.call <- function(s, regex) {
   parse_source.rcpp(s, paste0("[[:space:]]+", regex, "\\([^)]+\\)[^;]*(?:$|\\{)"))
 }
 
-fetch_symbol_map.call_local <- function(s, ...) {
-  res <- parseNamespaceFile(basename(s$description$Package), dirname(s$description$RemoteUrl), mustExist = FALSE)
+fetch_symbol_map.call <- function(s, ...) {
+  res <- parseNamespaceFile(s$description$Package, dirname(getNamespaceInfo(s$description$Package, "path")), mustExist = FALSE)
 
-  if (length(res$nativeRoutines) == 0) {
-    s$map_lines <- character()
-  }
   s$map_lines <- res
-  s
-}
-
-# Helper function to write the remote namespace file to a temporary directory
-# as parseNamespaceFile only operates on files, not contents
-fetch_remote_namespace <- function(content) {
-  temp_dir <- tempfile()
-  dir.create(temp_dir)
-  temp_file <- file.path(temp_dir, "NAMESPACE")
-  writeLines(content, con = temp_file)
-  parseNamespaceFile(basename(temp_dir), dirname(temp_dir))
-}
-
-fetch_symbol_map.call_github <- function(s) {
-  res <- github_content(
-    path = paths(s$description$RemoteSubdir, "NAMESPACE"),
-    owner = s$description$RemoteUsername,
-    repo = s$description$RemoteRepo,
-    ref = s$description$RemoteRef,
-    api_url = s$descripiton$RemoteHost)
-  s$map_lines <- fetch_remote_namespace(res)
-  s
-}
-
-fetch_symbol_map.call_cran <- function(s) {
-  res <- github_content(
-    path = "NAMESPACE",
-    owner = "cran",
-    repo = s$description$Package,
-    ref = s$description$Version)
-
-  s$map_lines <- fetch_remote_namespace(res)
   s
 }
 
@@ -86,6 +63,17 @@ source_files.call_cran <- function(s, name = s$search, ...) {
     path = "src/",
     owner = "cran",
     repo = s$description$Package,
+    language = "c")
+
+  s
+}
+
+source_files.call_base <- function(s, name = s$search, ...) {
+  s$src_files <- github_code_search(
+    name = name,
+    path = paths("src/library", s$description$Package, "src"),
+    owner = "wch",
+    repo = "r-source",
     language = "c")
 
   s
