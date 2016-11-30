@@ -26,7 +26,7 @@ Suggests:
     tibble,
     lassoshooting
 Remotes:
-    local::~/p/highlite,
+    jimhester/highlite,
     gaborcsardi/debugme
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1.9000
