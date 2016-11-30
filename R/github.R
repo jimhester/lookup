@@ -1,6 +1,9 @@
+#' @importFrom jsonlite base64_dec
+NULL
+
 github_content <- function(path, owner, repo, ref = "master", api_url = "https://api.github.com") {
   response <- gh("/repos/:owner/:repo/contents/:path", owner = owner, repo = repo, path = path, ref = ref, .api_url = api_url)
-  strsplit(rawToChar(jsonlite::base64_dec(response$content)), "\n", fixed = TRUE)[[1]]
+  strsplit(rawToChar(base64_dec(response$content)), "\n", fixed = TRUE)[[1]]
 }
 
 github_code_search <- function(name, path = "src/", owner, repo, language = c("c", "c++"), api_url = "https://api.github.com") {

@@ -1,6 +1,10 @@
-#' @importFrom methods .S4methods getMethod isGeneric
+#' @importFrom methods .S4methods getMethod isGeneric is methodSignatureMatrix
 #' @importFrom stats na.omit setNames
-#' @importFrom utils .S3methods capture.output getS3method packageDescription
+#' @importFrom utils .S3methods capture.output getS3method packageDescription getAnywhere head tail
+#' @importFrom pryr is_s3_method is_s3_generic
+#' @importFrom memoise memoise
+#' @importFrom crayon bold
+#' @importFrom highlite highlight_string
 #' @useDynLib lookup
 #' @importFrom Rcpp sourceCpp
 NULL
@@ -101,10 +105,10 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.f
     rcpp_exports <- rcpp_exports(fun$package)
     fun$ccall <- lapply(call_names(fun$def, type = rcpp_exports, subset = c(1)), lookup_function, type = "rcpp", package = fun$package)
   }
-  if (pryr::is_s3_method(fun$name, env = envir)) {
+  if (is_s3_method(fun$name, env = envir)) {
     fun$type <- append(fun$type, "S3 method", 0)
   }
-  if (pryr::is_s3_generic(fun$name, env = envir)) {
+  if (is_s3_generic(fun$name, env = envir)) {
     fun$type <- append(fun$type, "S3 generic", 0)
     fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
   }
@@ -119,7 +123,7 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.f
   fun
 }
 
-loaded_functions <- memoise::memoise(function(envs = loadedNamespaces()) {
+loaded_functions <- memoise(function(envs = loadedNamespaces()) {
   fnames <- lapply(envs,
     function(e) ls(envir = asNamespace(e), all.names = TRUE))
   data.frame(name = unlist(fnames),
@@ -145,7 +149,7 @@ parse_name <- function(x) {
 
 lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
-  S3_methods <- suppressWarnings(utils::.S3methods(f$name, envir = envir))
+  S3_methods <- suppressWarnings(.S3methods(f$name, envir = envir))
 
   flatten_list(lapply(S3_methods, function(name) lapply(as_lookup(getAnywhere(name)), lookup)), "lookup")
 }
@@ -166,7 +170,7 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 print.lookup <- function(x, envir = parent.frame(), ...) {
   # S4 methods
   lookup <- if (x$visible) "::" else ":::"
-  cat(crayon::bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
+  cat(bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
   if (!is.null(x$signature)) {
     cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
   }
@@ -177,7 +181,7 @@ print.lookup <- function(x, envir = parent.frame(), ...) {
     } else {
       x$def
     }
-  cat(highlight_output(base::print.function(def), language = "r"), sep = "\n")
+  cat(highlight_output(print.function(def), language = "r"), sep = "\n")
   lapply(x[["internal"]], print, envir = envir)
   lapply(x[["external"]], print, envir = envir)
   lapply(x[["ccall"]], print, envir = envir)
@@ -196,14 +200,14 @@ highlight_output <- function(code, language = "r") {
   if (language == "c++") {
     language <- "c"
   }
-  highlite::highlight_string(capture.output(force(code)), language = language)
+  highlight_string(capture.output(force(code)), language = language)
 }
 
 # Rstudio open function in viewer
 # Just function(x) View(x) or maybe
 # (rstudioapi::findFun("sendToConsole"))('View(cat)', echo = F)
 
-attached_functions <- memoise::memoise(function(sp = search()) {
+attached_functions <- memoise(function(sp = search()) {
   fnames <- lapply(seq_along(sp), ls)
   data.frame(name = unlist(fnames),
     package = rep.int(sub("package:", "", sp, fixed = TRUE), lengths(fnames)),
@@ -227,7 +231,7 @@ print.getAnywhere <- function(x, ...) {
     x$name
   }
 
-  cat(crayon::bold(name), "\n")
+  cat(bold(name), "\n")
   lapply(defs, print)
   invisible()
 }

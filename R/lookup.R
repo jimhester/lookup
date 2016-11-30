@@ -1,3 +1,6 @@
+#' @importFrom codetools findGlobals
+NULL
+
 fetch_symbol_map <- function(s, ...) UseMethod("fetch_symbol_map") # s$map_lines
 parse_symbol_map <- function(s, ...) UseMethod("parse_symbol_map") # s$map, s$regex
 source_files <- function(s, ...) UseMethod("source_files") # s$src_files
@@ -90,6 +93,6 @@ has_call <- function(f, type) {
   if (!is.function(f) || is.primitive(f)) {
     return(FALSE)
   }
-  calls <- codetools::findGlobals(f, merge = FALSE)$functions
+  calls <- findGlobals(f, merge = FALSE)$functions
   any(calls %in% type)
 }

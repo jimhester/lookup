@@ -42,8 +42,8 @@ print.compiled <- function(x, ...) {
   if (language == "c++") {
     language <- "c"
   }
-  cat(crayon::bold(x$language, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
-    highlite::highlight_string(x$content, language = language), sep = "\n")
+  cat(bold(x$language, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
+    highlight_string(x$content, language = language), sep = "\n")
 }
 
 captures <- function(x, m) {
