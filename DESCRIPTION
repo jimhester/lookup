@@ -21,13 +21,11 @@ LazyData: true
 Suggests:
     testthat,
     xml2,
-    debugme,
     fasttime,
     tibble,
     lassoshooting
 Remotes:
     jimhester/highlite,
-    gaborcsardi/debugme,
     gaborcsardi/gh
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1.9000
