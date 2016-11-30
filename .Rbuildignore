@@ -1,4 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^tests/testthat/\.cache$
+^\.cache$
 ^tests/testthat/TestRcpp/src/.*o$
+^TODO.md$
+^\.travis\.yml$

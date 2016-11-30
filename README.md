@@ -1,3 +1,5 @@
+![Travis-CI Build Status](https://travis-ci.org/jimhester/lookup.svg?branch=master)](https://travis-ci.org/jimhester/lookup)
+
 # Work in progress / Proof of Concept #
 Will likely have lots of bugs!
 
