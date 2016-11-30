@@ -67,6 +67,18 @@ as_lookup.function <- function(x, envir = environment(x), name = substitute(x)) 
   res
 }
 
+as_lookup.MethodDefinition <- function(x, envir = environment(x), name = substitute(x)) {
+  res <- list(def = x)
+
+  res$package <- function_package(res$def)
+  res$name <- x@generic
+  res$type <- typeof(res$def)
+  res$signature <- methodSignatureMatrix(x)
+  res$visible <- is_visible(res$name)
+  class(res) <- "lookup"
+  res
+}
+
 #' Lookup a function definiton
 #'
 #' @param x name or definition of a function
@@ -97,7 +109,7 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.f
     fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
   }
   if (isS4(fun$def)) {
-    if (isGeneric(fun$name, where = envir)) {
+    if (is(fun$def, "genericFunction")) {
       fun$type <- append(fun$type, "S4 generic", 0)
       fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
     } else {
@@ -147,15 +159,25 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   res <- Map(getMethod, f$name, signatures)
   names(res) <- signatures
-  res
+  lapply(res, lookup)
 }
 
 #' @export
 print.lookup <- function(x, envir = parent.frame(), ...) {
+  # S4 methods
   lookup <- if (x$visible) "::" else ":::"
-
   cat(crayon::bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
-  cat(highlight_output(base::print.function(x$def), language = "r"), sep = "\n")
+  if (!is.null(x$signature)) {
+    cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
+  }
+
+  def <-
+    if (isS4(x$def)) {
+      x$def@.Data
+    } else {
+      x$def
+    }
+  cat(highlight_output(base::print.function(def), language = "r"), sep = "\n")
   lapply(x[["internal"]], print, envir = envir)
   lapply(x[["external"]], print, envir = envir)
   lapply(x[["ccall"]], print, envir = envir)
