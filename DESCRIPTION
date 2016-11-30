@@ -27,7 +27,8 @@ Suggests:
     lassoshooting
 Remotes:
     jimhester/highlite,
-    gaborcsardi/debugme
+    gaborcsardi/debugme,
+    gaborcsardi/gh
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1.9000
 Collate: 
