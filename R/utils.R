@@ -37,6 +37,7 @@ Compiled <- function(...) {
      class = "compiled")
 }
 
+#' @export
 print.compiled <- function(x, ...) {
   language <- x$language
   if (language == "c++") {
