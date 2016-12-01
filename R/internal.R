@@ -1,3 +1,6 @@
+#' @include rcpp.R
+NULL
+
 internal_source <- function(name) {
   structure(list(name = name, type = "internal", language = "c", remote_type = "internal"), class = "internal")
 }
@@ -29,20 +32,4 @@ fetch_source.internal <- function(s, path, branch = "trunk") {
   s
 }
 
-parse_source.internal <- function(s, regex = s$regex) {
-  s$fun_start <- s$fun_end <- s$fun_lines <- NULL
-
-  new_lines <- cumsum(nchar(s$src_lines) + 1)
-  lines <- paste(s$src_lines, collapse = "\n")
-  start <- regexpr(regex, lines)
-  if (length(start)) {
-    end <- find_function_end(lines, start)
-    if (!is.na(end)) {
-      s$fun_start <- tail(which(new_lines <= start), n = 1L) + 1L
-      s$fun_end <- head(which(new_lines >= end), n = 1L) - 1L
-      s$fun_lines <- s$src_lines[seq(s$fun_start, s$fun_end)]
-      return(s)
-    }
-  }
-  s
-}
+parse_source.internal <- parse_source.rcpp

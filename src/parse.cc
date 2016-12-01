@@ -80,16 +80,15 @@ List parse_array_definition(std::string x) {
 
 // [[Rcpp::export]]
 int find_function_end(const CharacterVector& x, int start = 0) {
-  int brace_level = 0;
   std::string line = as<std::string>(x[0]);
   int i = start;
   // Find first opening brace
-  if (brace_level == 0) {
-    while(i < line.size() && line[i] != '{') {
-      ++i;
-    }
-  }
+  for(;i < line.size() && line[i] != '{';++i) { }
+
+  int brace_level = 0;
+  // Find closing brace
   for(;i < line.size();++i) {
+    // TODO: handle block comments /* */
     if (line[i] == '/') {
       if (i + 1 < line.size() && line[i + 1] == '/') {
         continue;

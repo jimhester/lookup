@@ -40,7 +40,7 @@ parse_source.rcpp <- function(s, regex = s$regex) {
     end <- find_function_end(lines, start)
     if (!is.na(end)) {
       s$fun_start <- tail(which(new_lines <= start), n = 1L) + 1L
-      s$fun_end <- head(which(new_lines >= end), n = 1L) - 1L
+      s$fun_end <- head(which(new_lines >= end), n = 1L)
       s$fun_lines <- s$src_lines[seq(s$fun_start, s$fun_end)]
       return(s)
     }
