@@ -4,8 +4,8 @@
 \alias{lookup}
 \title{Lookup a function definiton}
 \usage{
-lookup(x, name = substitute(x), envir = environment(x) \%||\%
-  parent.frame(), all = FALSE, ...)
+lookup(x, name = substitute(x), envir = environment(x) \%||\% baseenv(),
+  all = FALSE, ...)
 }
 \arguments{
 \item{x}{name or definition of a function}

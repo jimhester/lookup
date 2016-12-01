@@ -3,6 +3,10 @@
 #' @importFrom httr with_config config
 NULL
 
+bq <- function(x) {
+  paste0("`", x, "`")
+}
+
 regex_escape <- function(x) {
   chars <- c("*", ".", "?", "^", "+", "$", "|", "(", ")", "[", "]", "{", "}", "\\")
   gsub(paste0("([\\", paste0(collapse = "\\", chars), "])"), "\\\\\\1", x, perl = TRUE)
@@ -133,4 +137,22 @@ flatten_list <- function(x, class) {
   assign_item(x)
   res
 
+}
+
+# adapted from BiocInstlaler:::.getAnswer
+get_answer <- function(msg, allowed, default) {
+  if (!interactive()) {
+    return(default)
+  }
+  repeat {
+    cat(msg)
+    answer <- readLines(n = 1)
+    if (answer %in% allowed)
+      return(answer)
+  }
+}
+
+msg <- function(x, ..., width = getOption("width"), nl = TRUE) {
+  txt <- strwrap(x, width = width, exdent = 2)
+  cat(paste(txt, collapse = "\n"), if (isTRUE(nl)) "\n")
 }

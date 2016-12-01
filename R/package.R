@@ -59,12 +59,24 @@ function_package <- function(x) {
   nme
 }
 
+find_fun_name <- function(x, env) {
+  for (name in ls(env, all.names = TRUE)) {
+    if (name == ".Last.value") { next }
+    if (exists(name, envir = env) &&
+      identical(x, get(name, envir = env))) {
+      return(name)
+    }
+  }
+  stop("Function does not exist in ", bq(capture.output(print.default(env))), call. = FALSE)
+}
+
+
 as_lookup.function <- function(x, envir = environment(x), name = substitute(x)) {
   res <- list(def = x)
 
   res$package <- function_package(res$def)
   env <- topenv(envir)
-  res$name <- Filter(function(xx) identical(x, get(xx, envir = env)), ls(env))
+  res$name <- find_fun_name(x, env)
   res$type <- typeof(res$def)
   res$visible <- is_visible(res$name)
   class(res) <- "lookup"
@@ -91,7 +103,7 @@ as_lookup.MethodDefinition <- function(x, envir = environment(x), name = substit
 #' @param all Whether to return just loaded definitions or all definitions
 #' @param ... Additional arguments passed to internal functions
 #' @export
-lookup <- function(x, name = substitute(x), envir = environment(x) %||% parent.frame(), all = FALSE, ...) {
+lookup <- function(x, name = substitute(x), envir = environment(x) %||% baseenv(), all = FALSE, ...) {
   fun <- as_lookup(x, envir = envir, name = name)
 
   if (fun$type %in% c("builtin", "special")) {
@@ -151,7 +163,21 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   S3_methods <- suppressWarnings(.S3methods(f$name, envir = envir))
 
-  flatten_list(lapply(S3_methods, function(name) lapply(as_lookup(getAnywhere(name)), lookup)), "lookup")
+  res <- flatten_list(lapply(S3_methods, function(name) as_lookup(getAnywhere(name))), "lookup")
+
+  pkgs <- vapply(res, `[[`, character(1), "package")
+  nms <- vapply(res, `[[`, character(1), "name")
+  visible <- vapply(res, `[[`, logical(1), "visible")
+
+  funs <- paste0(pkgs, ifelse(visible, "::", ":::"), nms)
+  alphabetically <- order(funs)
+  msg(paste0(seq_along(funs), ": ", funs), nl = TRUE)
+  ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", A): "), c(seq_along(funs), "[A]ll"), "A")
+  if (ans != "A") {
+    res <- res[as.integer(ans)]
+  }
+
+  lapply(res, lookup)
 }
 
 lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
@@ -169,8 +195,8 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 #' @export
 print.lookup <- function(x, envir = parent.frame(), ...) {
   # S4 methods
-  lookup <- if (x$visible) "::" else ":::"
-  cat(bold(x$package, lookup, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
+  colons <- if (x$visible) "::" else ":::"
+  cat(bold(x$package, colons, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
   if (!is.null(x$signature)) {
     cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
   }

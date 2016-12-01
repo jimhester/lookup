@@ -72,7 +72,7 @@ lookup_function <- function(name, type, package = NULL) {
   }
 }
 
-call_names <- function(f, type, subset) {
+call_names <- function(f, type, subset = 1) {
   calls <- character()
   i <- 0
 

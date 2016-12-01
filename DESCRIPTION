@@ -7,7 +7,6 @@ Depends:
     R (>= 3.0.0)
 Imports:
     gh,
-    pryr,
     memoise,
     Rcpp,
     codetools,
@@ -33,6 +32,7 @@ LinkingTo: Rcpp
 RoxygenNote: 5.0.1.9000
 Collate: 
     'RcppExports.R'
+    'S3.R'
     'rcpp.R'
     'call.R'
     'external.R'
