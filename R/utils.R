@@ -156,3 +156,16 @@ msg <- function(x, ..., width = getOption("width"), nl = TRUE) {
   txt <- strwrap(x, width = width, exdent = 2)
   cat(paste(txt, collapse = "\n"), if (isTRUE(nl)) "\n")
 }
+
+# From gaborcsardi/crayon/utils.r
+multicol <- function(x) {
+  max_len <- max(nchar(x))
+  to_add <- max_len - nchar(x) + 1
+  x <- paste0(x, substring(paste0(collapse = "", rep(" ", max_len + 2)), 1, to_add))
+  screen_width <- getOption("width")
+  num_cols <- trunc(screen_width / max_len)
+  num_rows <- ceiling(length(x) / num_cols)
+  x <- c(x, rep("", num_cols * num_rows - length(x)))
+  xm <- matrix(x, ncol = num_cols, byrow = TRUE)
+  paste0(apply(xm, 1, paste, collapse = ""), "\n")
+}

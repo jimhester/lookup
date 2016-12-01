@@ -1,7 +1,6 @@
 #' @importFrom methods .S4methods getMethod isGeneric is methodSignatureMatrix
 #' @importFrom stats na.omit setNames
 #' @importFrom utils .S3methods capture.output getS3method packageDescription getAnywhere head tail
-#' @importFrom pryr is_s3_method is_s3_generic
 #' @importFrom memoise memoise
 #' @importFrom crayon bold
 #' @importFrom highlite highlight_string
@@ -171,8 +170,14 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   funs <- paste0(pkgs, ifelse(visible, "::", ":::"), nms)
   alphabetically <- order(funs)
-  msg(paste0(seq_along(funs), ": ", funs), nl = TRUE)
-  ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", A): "), c(seq_along(funs), "[A]ll"), "A")
+
+  funs <- funs[alphabetically]
+  res <- res[alphabetically]
+  names(res) <- funs
+
+  cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
+  ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+
   if (ans != "A") {
     res <- res[as.integer(ans)]
   }
