@@ -1,3 +1,8 @@
+#' @importFrom memoise memoise
+#' @importFrom utils flush.console
+#' @importFrom httr with_config config
+NULL
+
 regex_escape <- function(x) {
   chars <- c("*", ".", "?", "^", "+", "$", "|", "(", ")", "[", "]", "{", "}", "\\")
   gsub(paste0("([\\", paste0(collapse = "\\", chars), "])"), "\\\\\\1", x, perl = TRUE)
@@ -70,7 +75,38 @@ auto_name <- function(names) {
   names
 }
 
-gh <- memoise::memoise(gh::gh)
+spin <- local({
+  spinner <- c("-", "/", "|", "\\")
+  i <- 0
+  time <- NA
+  function() {
+    if (is.na(time)) {
+      time <<- Sys.time()
+    }
+    if (Sys.time() - time > .1) {
+      cat("\r", spinner[i + 1], sep = "")
+      i <<- (i + 1) %% 4
+      time <<- Sys.time()
+    }
+  }
+})
+
+progress <- function(down, up) {
+  if (interactive()) {
+    spin()
+  }
+  TRUE
+}
+
+gh <- memoise(function(...) {
+  on.exit({
+    flush.console()
+    cat("\r")
+  })
+  with_config(config(noprogress = FALSE, progressfunction = progress), {
+    gh::gh(...)
+  })
+})
 
 paths <- function(...) {
   args <- compact(list(...))
