@@ -198,40 +198,72 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 }
 
 #' @export
-print.lookup <- function(x, envir = parent.frame(), ...) {
-  # S4 methods
-  colons <- if (x$visible) "::" else ":::"
-  cat(bold(x$package, colons, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]\n", sep = "")
-  if (!is.null(x$signature)) {
-    cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
-  }
+print.lookup <-
+  local({
+    level <- 0
 
-  def <-
-    if (isS4(x$def)) {
-      x$def@.Data
-    } else {
-      x$def
+    function(x, envir = parent.frame(), ...) {
+      level <<- level + 1
+      on.exit(level <<- level - 1)
+      # S4 methods
+
+      highlight <- crayon::has_color()
+
+      str <- capture.output(type = "output", {
+        colons <- if (x$visible) "::" else ":::"
+        name <- paste0(bold(x$package, colons, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]")
+        cat(name, "\n")
+        if (!is.null(x$signature)) {
+          cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
+        }
+
+        def <-
+          if (isS4(x$def)) {
+            x$def@.Data
+          } else {
+            x$def
+          }
+
+        if (rstudioapi::isAvailable()) {
+          View(def, title = name)
+        } else {
+          cat(highlight_output(base::print.function(def), language = "r", highlight), sep = "\n")
+        }
+        lapply(x[["internal"]], print, envir = envir, highlight = highlight)
+        lapply(x[["external"]], print, envir = envir, highlight = highlight)
+        lapply(x[["ccall"]], print, envir = envir, highlight = highlight)
+        lapply(x[["S3_methods"]], print, envir = envir, highlight = highlight)
+        lapply(x[["S4_methods"]], print, envir = envir, highlight = highlight)
+        invisible()
+      })
+
+      if (level == 1 && should_page(str)) {
+        page_str(str)
+        cat(str, sep = "\n")
+      } else if (!rstudioapi::isAvailable()){
+        cat(str, sep = "\n")
+      }
+
+      invisible(x)
     }
-  cat(highlight_output(print.function(def), language = "r"), sep = "\n")
-  lapply(x[["internal"]], print, envir = envir)
-  lapply(x[["external"]], print, envir = envir)
-  lapply(x[["ccall"]], print, envir = envir)
-  lapply(x[["S3_methods"]], print, envir = envir)
-  lapply(x[["S4_methods"]], print, envir = envir)
-  invisible(x)
-}
+  })
 
 escape <- function(x) {
   chars <- c("*", ".", "?", "^", "+", "$", "|", "(", ")", "[", "]", "{", "}", "\\")
   gsub(paste0("([\\", paste0(collapse = "\\", chars), "])"), "\\\\\\1", x, perl = TRUE)
 }
 
-highlight_output <- function(code, language = "r") {
-  # The highlight library uses the same syntax for c and c++
-  if (language == "c++") {
-    language <- "c"
+highlight_output <- function(code, language = "r", color = TRUE) {
+  out <- capture.output(force(code))
+  if (isTRUE(color)) {
+    # The highlight library uses the same syntax for c and c++
+    if (language == "c++") {
+      language <- "c"
+    }
+    highlight_string(out, language = language)
+  } else {
+    out
   }
-  highlight_string(capture.output(force(code)), language = language)
 }
 
 # Rstudio open function in viewer

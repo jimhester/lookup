@@ -1,6 +1,7 @@
 #' @importFrom memoise memoise
 #' @importFrom utils flush.console
 #' @importFrom httr with_config config
+#' @importFrom withr with_envvar
 NULL
 
 bq <- function(x) {
@@ -47,13 +48,21 @@ Compiled <- function(...) {
 }
 
 #' @export
-print.compiled <- function(x, ...) {
+print.compiled <- function(x, ..., highlight = crayon::has_color()) {
   language <- x$language
   if (language == "c++") {
     language <- "c"
   }
-  cat(bold(x$language, "source:", paste0(x$path, "#L", x$start, "-L", x$end)),
-    highlight_string(x$content, language = language), sep = "\n")
+  heading <- paste0("// ", bold(x$language, "source:", paste0(x$path, "#L", x$start, "-L", x$end)))
+  body <- x$content
+  if (isTRUE(highlight)) {
+    body <- highlight_string(body, language = language)
+  }
+  if (rstudioapi::hasFun("navigateToFile")) {
+    view_str(paste0(heading, "\n", body), paste0(x$name, ".", x$language))
+  } else {
+    cat(heading, body, sep = "\n")
+  }
 }
 
 captures <- function(x, m) {
@@ -157,7 +166,7 @@ msg <- function(x, ..., width = getOption("width"), nl = TRUE) {
   cat(paste(txt, collapse = "\n"), if (isTRUE(nl)) "\n")
 }
 
-# From gaborcsardi/crayon/utils.r
+# From gaborcsardi/crayon/R/utils.r
 multicol <- function(x) {
   max_len <- max(nchar(x))
   to_add <- max_len - nchar(x) + 1
@@ -168,4 +177,47 @@ multicol <- function(x) {
   x <- c(x, rep("", num_cols * num_rows - length(x)))
   xm <- matrix(x, ncol = num_cols, byrow = TRUE)
   paste0(apply(xm, 1, paste, collapse = ""), "\n")
+}
+
+# From gaborcsardi/prettycode/R/print.R, gaborcsardi/prettycode/R/utils.R
+page_str <- function(str) {
+    cat(str, sep = "\n", file = tmp <- tempfile())
+    on.exit(unlink(tmp))
+    with_envvar(
+      c("LESS" = "-R", action = "prefix"),
+      file.show(tmp)
+    )
+}
+
+# view file in RStudio
+view_str <- function(str, name) {
+  cat(str, sep = "\n", file = tmp <- file.path(tempdir(), name))
+  #on.exit(unlink(tmp))
+  rstudioapi::callFun("navigateToFile", tmp)
+}
+
+should_page <- function(src) {
+  is_interactive() && is_terminal() && length(src) > num_lines()
+}
+
+num_lines <- function() {
+  tryCatch(
+    as.numeric(system("tput lines", intern = TRUE)),
+    error = function(e) NA_integer_
+  )
+}
+
+is_interactive <- function() interactive()
+
+is_terminal <- function() {
+  isatty(stdin()) &&
+    Sys.getenv("RSTUDIO") != 1 &&
+    Sys.getenv("R_GUI_APP_VERSION") == "" &&
+    .Platform$GUI != "Rgui" &&
+    !identical(getOption("STERM"), "iESS") &&
+    Sys.getenv("EMACS") != "t"
+}
+
+should_page <- function(src) {
+  is_interactive() && is_terminal() && length(src) > num_lines()
 }

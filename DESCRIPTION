@@ -14,7 +14,8 @@ Imports:
     rex,
     methods,
     highlite,
-    jsonlite
+    jsonlite,
+    rstudioapi
 License: MIT + file LICENSE
 LazyData: true
 Suggests:

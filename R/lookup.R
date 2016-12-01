@@ -61,7 +61,9 @@ lookup_function <- function(name, type, package = NULL) {
   for (path in s$src_files) {
     s <- parse_source(fetch_source(s, path), s$regex)
     if (!is.null(s$fun_lines)) {
-      return(Compiled(path = s$src_path,
+      return(Compiled(
+          name = s$search,
+          path = s$src_path,
           start = s$fun_start,
           end = s$fun_end,
           content = paste0(s$fun_lines, collapse = "\n"),
