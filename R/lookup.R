@@ -7,6 +7,12 @@ source_files <- function(s, ...) UseMethod("source_files") # s$src_files
 fetch_source <- function(s, path) UseMethod("fetch_source") # s$src_path, s$src_lines
 parse_source <- function(s, search) UseMethod("parse_source") # s$fun_start, s$fun_end, s$fun_lines
 
+fetch_symbol_map.unknown <- function(s, ...) s
+parse_symbol_map.unknown <- function(s, ...) s
+source_files.unknown <- function(s, ...) s
+fetch_source.unknown <- function(s, path) s
+parse_source.unknown <- function(s, path) s
+
 as.source_type <- function(package, type, name = NULL) { # s$search, s$type, s$language, s$remote_type, class(s)
 
   desc <- tryCatch(packageDescription(package, lib.loc = .libPaths()), warning = function(e) { stop(as.error(e)) })
