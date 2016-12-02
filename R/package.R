@@ -104,6 +104,7 @@ as_lookup.MethodDefinition <- function(x, envir = environment(x), name = substit
 #' @param envir the environment the function was defined in
 #' @param all Whether to return just loaded definitions or all definitions
 #' @param ... Additional arguments passed to internal functions
+#' @aliases print.function
 #' @export
 lookup <- function(x, name = substitute(x), envir = environment(x) %||% baseenv(), all = FALSE, ...) {
   fun <- as_lookup(x, envir = envir, name = name)

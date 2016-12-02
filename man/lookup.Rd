@@ -2,6 +2,7 @@
 % Please edit documentation in R/package.R
 \name{lookup}
 \alias{lookup}
+\alias{print.function}
 \title{Lookup a function definiton}
 \usage{
 lookup(x, name = substitute(x), envir = environment(x) \%||\% baseenv(),
