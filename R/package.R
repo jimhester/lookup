@@ -161,6 +161,9 @@ parse_name <- function(x) {
 lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   S3_methods <- suppressWarnings(.S3methods(f$name, envir = envir))
+  if (length(S3_methods) == 0) {
+    return()
+  }
 
   res <- flatten_list(lapply(S3_methods, function(name) as_lookup(getAnywhere(name))), "lookup")
 
@@ -169,17 +172,20 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   visible <- vapply(res, `[[`, logical(1), "visible")
 
   funs <- paste0(pkgs, ifelse(visible, "::", ":::"), nms)
-  alphabetically <- order(funs)
-
-  funs <- funs[alphabetically]
-  res <- res[alphabetically]
   names(res) <- funs
 
-  cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
-  ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+  if (length(res) > 1) {
+    alphabetically <- order(funs)
 
-  if (ans != "A") {
-    res <- res[as.integer(ans)]
+    funs <- funs[alphabetically]
+    res <- res[alphabetically]
+
+    cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
+    ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+
+    if (ans != "A") {
+      res <- res[as.integer(ans)]
+    }
   }
 
   lapply(res, lookup)
@@ -188,24 +194,30 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   S4_methods <- .S4methods(f$name)
+  if (length(S4_methods) == 0) {
+    return()
+  }
+
   info <- attr(S4_methods, "info")
 
   signatures <- strsplit(sub(paste0("^", escape(f$name), ",", "(.*)-method$"), "\\1", S4_methods), ",")
   funs <- paste0(info$from, ifelse(info$visible, "::", ":::"), info$generic, "(", lapply(signatures, paste0, collapse = ", "), ")")
 
   res <- Map(getMethod, f$name, signatures)
-
-  alphabetically <- order(funs)
-
-  funs <- funs[alphabetically]
-  res <- res[alphabetically]
   names(res) <- funs
 
-  cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
-  ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+  if (length(res) > 1) {
+    alphabetically <- order(funs)
 
-  if (ans != "A") {
-    res <- res[as.integer(ans)]
+    funs <- funs[alphabetically]
+    res <- res[alphabetically]
+
+    cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
+    ans <- get_answer(paste0("Which S4 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+
+    if (ans != "A") {
+      res <- res[as.integer(ans)]
+    }
   }
 
   lapply(res, lookup)
@@ -254,7 +266,6 @@ print.lookup <-
 
       if (level == 1 && should_page(str)) {
         page_str(str)
-        cat(str, sep = "\n")
       } else if (!rstudioapi::isAvailable()){
         cat(str, sep = "\n")
       }
