@@ -26,14 +26,15 @@ Suggests:
     fasttime,
     tibble,
     lassoshooting,
-    devtools
+    devtools,
+    covr
 Remotes:
     jimhester/highlite,
     gaborcsardi/gh,
     hadley/memoise
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1.9000
-Collate: 
+Collate:
     'RcppExports.R'
     'S3.R'
     'rcpp.R'

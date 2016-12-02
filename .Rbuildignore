@@ -5,3 +5,4 @@
 ^tests/testthat/TestRcpp/src/.*o$
 ^TODO.md$
 ^\.travis\.yml$
+^codecov\.yml$

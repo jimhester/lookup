@@ -3,6 +3,8 @@
 > Lookup R function definitions, including compiled, S3 and S4 methods
 
 [![Travis-CI Build Status](https://travis-ci.org/jimhester/lookup.svg?branch=master)](https://travis-ci.org/jimhester/lookup)
+[![Coverage Status](https://img.shields.io/codecov/c/github/jimhester/lookup/master.svg)](https://codecov.io/github/jimh
+ester/lookup?branch=master)
 
 ![Lookup](http://i.giphy.com/l2Je66zG6mAAZxgqI.gif)
 
