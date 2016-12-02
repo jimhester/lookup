@@ -16,16 +16,16 @@ devtools::install_github("jimhester/lookup")
 ## Example
 
 ### Normal Functions (with compiled code)
-[Imgur](http://i.imgur.com/TjyfFFU.png)
+![Imgur](http://i.imgur.com/TjyfFFU.png)
 
 ### S3 generics and methods
-[Imgur](http://i.imgur.com/u4XM6NX.png)
+![Imgur](http://i.imgur.com/u4XM6NX.png)
 
 ### S4 generics and methods
-[Imgur](http://i.imgur.com/kMEVDnv.png)
+![Imgur](http://i.imgur.com/kMEVDnv.png)
 
 ### In RStudio IDE
-[Imgur](http://i.imgur.com/8iH3FdB.png)
+![Imgur](http://i.imgur.com/8iH3FdB.png)
 
 ## Setup
 
