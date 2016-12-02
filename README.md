@@ -1,6 +1,6 @@
 # lookup
 
-> Lookup R function definitions, including compiled, S3 and S4 methods
+> Lookup R function definitions, including compiled code, S3 and S4 methods.
 
 [![Travis-CI Build Status](https://travis-ci.org/jimhester/lookup.svg?branch=master)](https://travis-ci.org/jimhester/lookup)
 [![Coverage Status](https://img.shields.io/codecov/c/github/jimhester/lookup/master.svg)](https://codecov.io/github/jimh
@@ -39,27 +39,38 @@ if (interactive()) {
 ```
 
 ## Example
-```r
-# Normal functions
-lookup(sample)
 
-# Normal functions with calls to compiled code
-lookup(body)
+### Normal Functions (with compiled code)
+[Imgur](http://i.imgur.com/TjyfFFU.png)
 
-# S3 generics
-lookup(summary)
+### S3 generics and methods
+[Imgur](http://i.imgur.com/u4XM6NX.png)
 
-# S4 generics
-lookup(show)
-``````
+### S4 generics and methods
+[Imgur](http://i.imgur.com/kMEVDnv.png)
+
+### In RStudio IDE
+[Imgur](http://i.imgur.com/8iH3FdB.png)
+
+# How this works
+
+If a base R function is printed that calls compiled code the code is lookup up
+using the [R git mirror](https://github.com/wch/r-source). If a CRAN package
+has compiled code it is looked up on the [CRAN git
+mirror](https://github.com/cran). If a package is installed with
+`devtools::install_github()` or `devtools::install()` the remote or local
+repository location is searched for the code.
+
+This has been tested to work with `.Internal`, `.External`, `.Call` and
+[Rcpp](https://github.com/RcppCore/Rcpp) calls.
 
 ## Issues ##
 This package uses a number of heuristics to find function definitions. This means it can
-miss some cases, if you find a function that is not lookup up properly, please
-[open an issue](https://github.com/jimhester/lookup/issues).
+fail in some cases, if you find a function that is not lookup up properly,
+please [open an issue](https://github.com/jimhester/lookup/issues).
 
 ## Thanks ##
-[Gábor Csárdi](https://github.com/gaborcsardi) for [gh](https://github.com/r-pkgs/gh) and inspiration and code for handling pagination and busy updating.
-[Jenny Bryan](https://github.com/jennybc) For codifying the process of
-[accessing the R source](https://github.com/jennybc/access-r-source), my main
-inspiration and motivation for starting this package.
+[R Core and Community](https://www.r-project.org) For promoting open source software to make this possible.
+[Winston Chang](https://github.com/wch) For running the [Git mirror of the R Source](https://github.com/wch/r-source).
+[Gábor Csárdi](https://github.com/gaborcsardi) For the [gh](https://github.com/r-pkgs/gh) package, the [CRAN git mirror](https://github.com/cran) and inspiration and code for handling pagination and busy updating.
+[Jenny Bryan](https://github.com/jennybc) For codifying the process of [accessing the R source](https://github.com/jennybc/access-r-source), which was my main inspiration and motivation for starting this package.
