@@ -3,6 +3,8 @@
 export(add_c)
 export(add_call)
 export(add_external)
+export(test_S3)
+export(test_S4)
 importFrom(Rcpp,sourceCpp)
 useDynLib(TestRcpp)
 useDynLib(TestRcpp,add_c_impl)

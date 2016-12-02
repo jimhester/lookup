@@ -65,4 +65,19 @@ with_local_package("TestRcpp", {
 
     expect_null(lookup_function("missing", "call", "TestRcpp"))
   })
+
+  test_that("S3 and S4 generic with no methods work", {
+    res <- lookup(TestRcpp::test_S3)
+    expect_equal(res$package, "TestRcpp")
+    expect_equal(res$type, c("S3 generic", "closure"))
+    expect_null(res$S3_methods)
+    expect_null(res$S4_methods)
+
+    res <- lookup(TestRcpp::test_S4)
+    expect_equal(res$package, "TestRcpp")
+    expect_equal(res$type, c("S4 generic", "closure"))
+    expect_null(res$S3_methods)
+    expect_null(res$S4_methods)
+  })
+
 })

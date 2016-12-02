@@ -19,3 +19,9 @@ add_external <- function(x, y) {
 add_c <- function(x, y) {
   .C("add_c_impl", as.double(x), as.double(y), ans = double(1))$ans
 }
+
+#' @export
+test_S3 <- function(x) UseMethod("test_S3")
+
+#' @export
+setGeneric("test_S4", function(x) standardGeneric("test_S4"))
