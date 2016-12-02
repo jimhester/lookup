@@ -1,6 +1,6 @@
 # lookup
 
-> Lookup function definitions, compiled, S3, S4 methods
+> Lookup R function definitions, including compiled, S3 and S4 methods
 
 [![Travis-CI Build Status](https://travis-ci.org/jimhester/lookup.svg?branch=master)](https://travis-ci.org/jimhester/lookup)
 
@@ -15,17 +15,17 @@ devtools::install_github("jimhester/lookup")
 ## Setup
 
 lookup makes heavy use of the [GitHub API](https://developer.github.com/v3/),
-which has a rate limit of 60 requests per hour on unauthenticated requests [1]. Therefore
-you should create a [Personal access
-token](https://github.com/settings/tokens) with no scope, which will increase
-your limit to 5000 per minute.
+which has a rate limit of [60 requests per
+hour](https://developer.github.com/v3/#rate-limiting) when unauthenticated. You
+can create a [Personal access token](https://github.com/settings/tokens) with
+no scope, which will increase your limit to 5000 requests per hour.
 
 Once you have generated a token, add it to your `~/.Renviron` file or shell
-startup and it will be automatically used for further requests.
+startup file and it will be automatically used for further requests.
 ```
 GITHUB_PAT=7d8d0436835d1baXYZ1234
 ```
-`gh::gh("/rate_limit")` can be used to query your limits.
+`gh::gh("/rate_limit")` can be used to query your current usage and limits.
 
 ## Default printing
 lookup can be used as a complete replacement for function printing by attaching
@@ -61,5 +61,3 @@ miss some cases, if you find a function that is not lookup up properly, please
 [Jenny Bryan](https://github.com/jennybc) For codifying the process of
 [accessing the R source](https://github.com/jennybc/access-r-source), my main
 inspiration and motivation for starting this package.
-
-[1]: https://developer.github.com/v3/#rate-limiting
