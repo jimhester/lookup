@@ -2,6 +2,7 @@
 #' @importFrom utils flush.console
 #' @importFrom httr with_config config
 #' @importFrom withr with_envvar
+#' @importFrom crayon strip_style
 NULL
 
 bq <- function(x) {
@@ -168,8 +169,9 @@ msg <- function(x, ..., width = getOption("width"), nl = TRUE) {
 
 # From gaborcsardi/crayon/R/utils.r
 multicol <- function(x) {
-  max_len <- max(nchar(x))
-  to_add <- max_len - nchar(x) + 1
+  xs <- strip_style(x)
+  max_len <- max(nchar(xs))
+  to_add <- max_len - nchar(xs) + 1
   x <- paste0(x, substring(paste0(collapse = "", rep(" ", max_len + 2)), 1, to_add))
   screen_width <- getOption("width")
   num_cols <- trunc(screen_width / max_len)

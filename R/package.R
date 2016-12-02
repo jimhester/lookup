@@ -142,7 +142,11 @@ loaded_functions <- memoise(function(envs = loadedNamespaces()) {
     stringsAsFactors = FALSE)
 })
 
-#print.function <- function(x, ...) print.lookup(lookup(x, ...))
+#' @export
+print.function <- function(x, ...) print(lookup(x, ...))
+
+#' @export
+setMethod("show", "genericFunction", function(object) print(lookup(object)))
 
 parse_name <- function(x) {
   split <- strsplit(x, ":::?")[[1]]
@@ -180,8 +184,7 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
     funs <- funs[alphabetically]
     res <- res[alphabetically]
 
-    cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
-    ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+    ans <- method_dialog(funs)
 
     if (ans != "A") {
       res <- res[as.integer(ans)]
@@ -189,6 +192,13 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   }
 
   lapply(res, lookup)
+}
+
+method_dialog <- function(funs) {
+  nums <- as.character(seq_along(funs))
+  width_nums <- max(nchar(nums))
+  cat(multicol(paste0(sprintf(paste0("%", width_nums, "s"), nums), "| ", funs)), sep = "")
+  get_answer(paste0("Which method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
 }
 
 lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
@@ -212,8 +222,7 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
     funs <- funs[alphabetically]
     res <- res[alphabetically]
 
-    cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
-    ans <- get_answer(paste0("Which S4 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+    ans <- method_dialog(funs)
 
     if (ans != "A") {
       res <- res[as.integer(ans)]
