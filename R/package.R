@@ -89,7 +89,7 @@ as_lookup.MethodDefinition <- function(x, envir = environment(x), name = substit
   res$name <- x@generic
   res$type <- typeof(res$def)
   res$signature <- methodSignatureMatrix(x)
-  res$visible <- is_visible(res$name)
+  res$visible <- TRUE
   class(res) <- "lookup"
   res
 }
@@ -188,12 +188,26 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   S4_methods <- .S4methods(f$name)
-  S4_methods_info <- attr(S4_methods, "info")
+  info <- attr(S4_methods, "info")
 
   signatures <- strsplit(sub(paste0("^", escape(f$name), ",", "(.*)-method$"), "\\1", S4_methods), ",")
+  funs <- paste0(info$from, ifelse(info$visible, "::", ":::"), info$generic, "(", lapply(signatures, paste0, collapse = ", "), ")")
 
   res <- Map(getMethod, f$name, signatures)
-  names(res) <- signatures
+
+  alphabetically <- order(funs)
+
+  funs <- funs[alphabetically]
+  res <- res[alphabetically]
+  names(res) <- funs
+
+  cat(multicol(paste0(seq_along(funs), ": ", funs)), sep = "")
+  ans <- get_answer(paste0("Which S3 method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+
+  if (ans != "A") {
+    res <- res[as.integer(ans)]
+  }
+
   lapply(res, lookup)
 }
 
