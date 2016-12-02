@@ -167,6 +167,27 @@ msg <- function(x, ..., width = getOption("width"), nl = TRUE) {
   cat(paste(txt, collapse = "\n"), if (isTRUE(nl)) "\n")
 }
 
+method_dialog <- function(funs, res) {
+  names(res) <- funs
+  if (length(res) > 1) {
+    alphabetically <- order(funs)
+
+    funs <- funs[alphabetically]
+    res <- res[alphabetically]
+
+    nums <- as.character(seq_along(funs))
+    width_nums <- max(nchar(nums))
+    cat(multicol(paste0(sprintf(paste0("%", width_nums, "s"), nums), "| ", funs)), sep = "")
+    ans <- get_answer(paste0("Which method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+
+    if (ans != "A") {
+      res <- res[as.integer(ans)]
+    }
+  }
+
+  res
+}
+
 # From gaborcsardi/crayon/R/utils.r
 multicol <- function(x) {
   xs <- strip_style(x)

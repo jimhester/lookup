@@ -6,6 +6,7 @@
 #' @importFrom highlite highlight_string
 #' @useDynLib lookup
 #' @importFrom Rcpp sourceCpp
+#' @importFrom utils View
 NULL
 
 as_lookup <- function(x, envir = parent.frame(), ...) {
@@ -145,7 +146,6 @@ loaded_functions <- memoise(function(envs = loadedNamespaces()) {
 #' @export
 print.function <- function(x, ...) print(lookup(x, ...))
 
-#' @export
 setMethod("show", "genericFunction", function(object) print(lookup(object)))
 
 parse_name <- function(x) {
@@ -176,29 +176,10 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   visible <- vapply(res, `[[`, logical(1), "visible")
 
   funs <- paste0(pkgs, ifelse(visible, "::", ":::"), nms)
-  names(res) <- funs
 
-  if (length(res) > 1) {
-    alphabetically <- order(funs)
-
-    funs <- funs[alphabetically]
-    res <- res[alphabetically]
-
-    ans <- method_dialog(funs)
-
-    if (ans != "A") {
-      res <- res[as.integer(ans)]
-    }
-  }
+  res <- method_dialog(funs, res)
 
   lapply(res, lookup)
-}
-
-method_dialog <- function(funs) {
-  nums <- as.character(seq_along(funs))
-  width_nums <- max(nchar(nums))
-  cat(multicol(paste0(sprintf(paste0("%", width_nums, "s"), nums), "| ", funs)), sep = "")
-  get_answer(paste0("Which method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
 }
 
 lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
@@ -214,20 +195,8 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   funs <- paste0(info$from, ifelse(info$visible, "::", ":::"), info$generic, "(", lapply(signatures, paste0, collapse = ", "), ")")
 
   res <- Map(getMethod, f$name, signatures)
-  names(res) <- funs
 
-  if (length(res) > 1) {
-    alphabetically <- order(funs)
-
-    funs <- funs[alphabetically]
-    res <- res[alphabetically]
-
-    ans <- method_dialog(funs)
-
-    if (ans != "A") {
-      res <- res[as.integer(ans)]
-    }
-  }
+  res <- method_dialog(funs, res)
 
   lapply(res, lookup)
 }

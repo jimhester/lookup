@@ -15,7 +15,9 @@ Imports:
     methods,
     highlite,
     jsonlite,
-    rstudioapi
+    rstudioapi,
+    withr,
+    httr
 License: MIT + file LICENSE
 LazyData: true
 Suggests:
@@ -44,4 +46,3 @@ Collate:
     'package.R'
     'registered_routines.R'
     'utils.R'
-    'zzz.R'

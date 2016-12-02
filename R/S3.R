@@ -1,4 +1,5 @@
 #' @importFrom tools nonS3methods
+#' @importFrom methods getGroupMembers
 NULL
 
 is_internal <- function(f) {
