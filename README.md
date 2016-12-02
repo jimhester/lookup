@@ -69,7 +69,7 @@ means it can fail in some cases, if you find a function that is not lookup up
 properly, please [open an issue](https://github.com/jimhester/lookup/issues).
 
 ## Thanks ##
-[R Core and Community](https://www.r-project.org) For promoting open source software to make this possible.
-[Winston Chang](https://github.com/wch) For running the [Git mirror of the R Source](https://github.com/wch/r-source).
-[Gábor Csárdi](https://github.com/gaborcsardi) For the [gh](https://github.com/r-pkgs/gh) package, the [CRAN git mirror](https://github.com/cran) and inspiration and code for handling pagination and busy updating.
-[Jenny Bryan](https://github.com/jennybc) For codifying the process of [accessing the R source](https://github.com/jennybc/access-r-source), which was my main inspiration and motivation for starting this package.
+- [R Core and Community](https://www.r-project.org) For promoting open source software to make this possible.
+- [Winston Chang](https://github.com/wch) For running the [Git mirror of the R Source](https://github.com/wch/r-source).
+- [Gábor Csárdi](https://github.com/gaborcsardi) For the [gh](https://github.com/r-pkgs/gh) package, the [CRAN git mirror](https://github.com/cran) and inspiration and code for handling pagination and busy updating.
+- [Jenny Bryan](https://github.com/jennybc) For codifying the process of [accessing the R source](https://github.com/jennybc/access-r-source), which was my main inspiration and motivation for starting this package.
