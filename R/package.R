@@ -216,12 +216,13 @@ print.lookup <-
   local({
     level <- 0
 
-    function(x, envir = parent.frame(), ...) {
+    function(x, envir = parent.frame(), highlight = crayon::has_color(), ...) {
+      # Need to evaluate this before the capture.output
+      force(highlight)
+
       level <<- level + 1
       on.exit(level <<- level - 1)
       # S4 methods
-
-      highlight <- crayon::has_color()
 
       str <- capture.output(type = "output", {
         colons <- if (x$visible) "::" else ":::"
