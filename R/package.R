@@ -212,7 +212,8 @@ print.lookup <-
     level <- 0
 
     function(x, envir = parent.frame(), highlight = crayon::has_color(), ...) {
-      # Need to evaluate this before the capture.output
+      # Need to evaluate these before the capture.output
+      force(x)
       force(highlight)
 
       level <<- level + 1
