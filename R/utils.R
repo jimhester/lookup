@@ -2,7 +2,7 @@
 #' @importFrom utils flush.console
 #' @importFrom httr with_config config
 #' @importFrom withr with_envvar
-#' @importFrom crayon strip_style
+#' @importFrom crayon cyan strip_style
 NULL
 
 bq <- function(x) {
@@ -177,8 +177,8 @@ method_dialog <- function(funs, res) {
 
     nums <- as.character(seq_along(funs))
     width_nums <- max(nchar(nums))
-    cat(multicol(paste0(sprintf(paste0("%", width_nums, "s"), nums), "| ", funs)), sep = "")
-    ans <- get_answer(paste0("Which method(s)? (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+    cat(multicol(paste0(cyan(sprintf(paste0("%", width_nums, "s"), nums)), "| ", funs)), sep = "")
+    ans <- get_answer(paste0(bold("Which method(s)?"), " (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
 
     if (ans != "A") {
       res <- res[as.integer(ans)]

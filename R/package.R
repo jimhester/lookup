@@ -6,7 +6,7 @@
 #' @importFrom highlite highlight_string
 #' @useDynLib lookup
 #' @importFrom Rcpp sourceCpp
-#' @importFrom utils View
+#' @export print.function
 NULL
 
 as_lookup <- function(x, envir = parent.frame(), ...) {
@@ -89,7 +89,9 @@ as_lookup.MethodDefinition <- function(x, envir = environment(x), name = substit
   res$package <- function_package(res$def)
   res$name <- x@generic
   res$type <- typeof(res$def)
-  res$signature <- methodSignatureMatrix(x)
+  if (!is(res$def, "genericFunction")) {
+    res$signature <- methodSignatureMatrix(x)
+  }
   res$visible <- TRUE
   class(res) <- "lookup"
   res
@@ -144,7 +146,7 @@ loaded_functions <- memoise(function(envs = loadedNamespaces()) {
 })
 
 #' @export
-print.function <- function(x, ...) print(lookup(x, ...))
+print.function <- function(x, ...) print.lookup(lookup(x, ...))
 
 setMethod("show", "genericFunction", function(object) print(lookup(object)))
 
@@ -200,6 +202,8 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   lapply(res, lookup)
 }
+
+globalVariables("View", "lookup")
 
 #' @export
 print.lookup <-

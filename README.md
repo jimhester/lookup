@@ -13,6 +13,19 @@ ester/lookup?branch=master)
 # install.packages("devtools")
 devtools::install_github("jimhester/lookup")
 ```
+## Example
+
+### Normal Functions (with compiled code)
+[Imgur](http://i.imgur.com/TjyfFFU.png)
+
+### S3 generics and methods
+[Imgur](http://i.imgur.com/u4XM6NX.png)
+
+### S4 generics and methods
+[Imgur](http://i.imgur.com/kMEVDnv.png)
+
+### In RStudio IDE
+[Imgur](http://i.imgur.com/8iH3FdB.png)
 
 ## Setup
 
@@ -38,20 +51,6 @@ if (interactive()) {
 }
 ```
 
-## Example
-
-### Normal Functions (with compiled code)
-[Imgur](http://i.imgur.com/TjyfFFU.png)
-
-### S3 generics and methods
-[Imgur](http://i.imgur.com/u4XM6NX.png)
-
-### S4 generics and methods
-[Imgur](http://i.imgur.com/kMEVDnv.png)
-
-### In RStudio IDE
-[Imgur](http://i.imgur.com/8iH3FdB.png)
-
 # How this works
 
 If a base R function is printed that calls compiled code the code is lookup up
@@ -65,9 +64,9 @@ This has been tested to work with `.Internal`, `.External`, `.Call` and
 [Rcpp](https://github.com/RcppCore/Rcpp) calls.
 
 ## Issues ##
-This package uses a number of heuristics to find function definitions. This means it can
-fail in some cases, if you find a function that is not lookup up properly,
-please [open an issue](https://github.com/jimhester/lookup/issues).
+This package uses a number of heuristics to find function definitions. This
+means it can fail in some cases, if you find a function that is not lookup up
+properly, please [open an issue](https://github.com/jimhester/lookup/issues).
 
 ## Thanks ##
 [R Core and Community](https://www.r-project.org) For promoting open source software to make this possible.
