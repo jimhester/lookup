@@ -2,7 +2,7 @@
 
 > Lookup function definitions, compiled, S3, S4 methods
 
-![Travis-CI Build Status](https://travis-ci.org/jimhester/lookup.svg?branch=master)](https://travis-ci.org/jimhester/lookup)
+[![Travis-CI Build Status](https://travis-ci.org/jimhester/lookup.svg?branch=master)](https://travis-ci.org/jimhester/lookup)
 
 ![Lookup](http://i.giphy.com/l2Je66zG6mAAZxgqI.gif)
 
