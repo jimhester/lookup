@@ -71,7 +71,7 @@ fetch_symbol_map.rcpp_github <- function(s) {
     owner = s$description$RemoteUsername,
     repo = s$description$RemoteRepo,
     ref = s$description$RemoteRef,
-    api_url = s$descripiton$RemoteHost)
+    api_url = s$description$RemoteHost)
   s
 }
 
