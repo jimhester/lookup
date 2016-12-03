@@ -1,4 +1,3 @@
-#' @importFrom tools nonS3methods
 #' @importFrom methods getGroupMembers
 NULL
 
@@ -35,7 +34,7 @@ stop_list <- function() {
   if (getRversion() < "3.3.0") {
     getNamespace("tools")[[".make_S3_methods_stop_list"]](NULL)
   } else {
-    nonS3methods(NULL)
+    tools::nonS3methods(NULL)
   }
 }
 
