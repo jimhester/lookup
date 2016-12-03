@@ -90,10 +90,11 @@ call_names <- function(f, type, subset = 1) {
     if (is.call(x)) {
       if(as.character(x[[1]])[[1]] %in% type) {
         calls[[i <<- i + 1]] <<- as.character(x[[subset]])
+        return()
       }
     }
-    for (i in seq_along(x)) {
-      call_calls(x[[i]])
+    for (j in seq_along(x)) {
+      call_calls(x[[j]])
     }
   }
   call_calls(body(f))
