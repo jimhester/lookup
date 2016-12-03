@@ -62,7 +62,7 @@ mirror](https://github.com/cran). If a package is installed with
 `devtools::install_github()` or `devtools::install()` the remote or local
 repository location is searched for the code.
 
-This has been tested to work with `.Internal`, `.External`, `.Call` and
+This has been tested to work with `.Internal`, `.External`, `.C`, `.Call` and
 [Rcpp](https://github.com/RcppCore/Rcpp) calls.
 
 ## Issues ##
