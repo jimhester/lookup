@@ -6,7 +6,9 @@
 [![Coverage Status](https://img.shields.io/codecov/c/github/jimhester/lookup/master.svg)](https://codecov.io/github/jimh
 ester/lookup?branch=master)
 
-![Imgur](http://i.imgur.com/hiMtsWD.jpg)
+<p align="center">
+  <img src="http://i.imgur.com/hiMtsWD.jpg" alt="luke">
+</p>
 
 ## Installation
 ```r
