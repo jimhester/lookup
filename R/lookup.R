@@ -6,6 +6,7 @@ parse_symbol_map <- function(s, ...) UseMethod("parse_symbol_map") # s$map, s$re
 source_files <- function(s, ...) UseMethod("source_files") # s$src_files
 fetch_source <- function(s, path) UseMethod("fetch_source") # s$src_path, s$src_lines
 parse_source <- function(s, search) UseMethod("parse_source") # s$fun_start, s$fun_end, s$fun_lines
+source_url <- function(s, ...) UseMethod("source_url")
 
 fetch_symbol_map.unknown <- function(s, ...) s
 parse_symbol_map.unknown <- function(s, ...) s
@@ -63,13 +64,14 @@ lookup_function <- function(name, type, package = NULL) {
     if (!is.null(s$fun_lines)) {
       return(Compiled(
           name = s$search,
-          path = s$src_path,
+          path = path,
           start = s$fun_start,
           end = s$fun_end,
           content = paste0(s$fun_lines, collapse = "\n"),
           language = s$language,
           type = s$type,
-          remote_type = s$remote_type))
+          remote_type = s$remote_type,
+          url = source_url(s, path)))
     }
   }
 }

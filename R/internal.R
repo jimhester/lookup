@@ -33,3 +33,7 @@ fetch_source.internal <- function(s, path, branch = "trunk") {
 }
 
 parse_source.internal <- parse_source.rcpp
+
+source_url.internal <- function(s, path = s$src_path[[1]], ..., branch = "trunk") {
+  github_content_url(path = path, owner = "wch", repo = "r-source", ref = branch)
+}

@@ -1,6 +1,6 @@
 #' @importFrom methods .S4methods getMethod isGeneric is methodSignatureMatrix
 #' @importFrom stats na.omit setNames
-#' @importFrom utils .S3methods capture.output getS3method packageDescription getAnywhere head tail
+#' @importFrom utils .S3methods capture.output getS3method packageDescription getAnywhere head tail browseURL
 #' @importFrom memoise memoise
 #' @importFrom crayon bold
 #' @importFrom highlite highlight_string
@@ -8,6 +8,8 @@
 #' @importFrom Rcpp sourceCpp
 #' @export print.function
 NULL
+
+the <- new.env(parent = emptyenv())
 
 as_lookup <- function(x, envir = parent.frame(), ...) {
   UseMethod("as_lookup")
@@ -135,6 +137,9 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% baseenv(
       fun$type <- append(fun$type, "S4 method")
     }
   }
+
+  the$last_lookup <- fun
+
   fun
 }
 
@@ -312,4 +317,44 @@ print.getAnywhere <- function(x, ...) {
   cat(bold(name), "\n")
   lapply(defs, print)
   invisible()
+}
+
+#' Retrieve the source url(s) from a lookup object
+#'
+#' @param x The object to return the source_url from
+#' @param ... Additional arguments passed to methods
+#' @export
+source_url <- function(x, ...) UseMethod("source_url")
+
+#' @export
+source_url.lookup <- function(x = the$last_lookup, ...) {
+  stopifnot(inherits(x, "lookup"))
+
+  links <- character()
+  for (nme in c("internal", "external", "ccall", "S3_methods", "S4_methods")) {
+    links <- append(links, vapply(x[[nme]], source_url, character(1)))
+  }
+  links
+}
+
+#' @export
+source_url.compiled <- function(x, ...) {
+  if (x$remote_type == "local") {
+    x$url
+  } else {
+    paste0(x$url, "#L", x$start, "-L", x$end)
+  }
+}
+
+#' Browse a lookup
+#'
+#' If a github or CRAN lookup, this will open a browser to the github code
+#' mirror. If a local file will open the application associated with that file
+#' type.
+#' @param x The lookup to browse, by default will use the last url of the last lookup found.
+#' @export
+lookup_browse <- function(x = the$last_lookup) {
+  stopifnot(inherits(x, "lookup"))
+
+  browseURL(tail(source_url(x), n = 1))
 }

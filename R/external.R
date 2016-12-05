@@ -1,4 +1,4 @@
-#' @include call.R
+#' @include internal.R
 NULL
 
 fetch_symbol_map.external <- fetch_symbol_map.call

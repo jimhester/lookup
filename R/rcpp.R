@@ -20,6 +20,9 @@ parse_symbol_map.rcpp <- function(s) {
   # convert all spaces to match multiple spaces
   declarations <- gsub("[[:space:]]+", "[[:space:]]+", regex_escape(declarations))
 
+  # allow spaces before and after ), (
+  declarations <- gsub("(\\\\[)(])", "[[:space:]]*\\1[[:space:]]*", declarations)
+
   # add wildcards before , and ) to handle default arguments
   declarations <- gsub("(\\\\?[,)])", "[^,)]*\\1", declarations)
 
@@ -102,6 +105,10 @@ fetch_source.local <- function(s, path) {
   s
 }
 
+source_url.local <- function(s, path = s$src_path[[1]], ...) {
+  paths(s$description$RemoteUrl, path)
+}
+
 # -- Github --
 source_files.rcpp_github <- function(s, name = s$search, ...) {
   s$src_files <- github_code_search(
@@ -137,6 +144,29 @@ fetch_source.github <- function(s, path) {
 
   s$src_path <- path
   s
+}
+
+source_url.github <- function(s, path = s$src_path[[1]], ...) {
+  github_content_url(
+    path = path,
+    owner = s$description$RemoteUsername,
+    repo = s$description$RemoteRepo,
+    ref = s$description$RemoteRef)
+}
+
+source_url.cran <- function(s, path = s$src_path[[1]], ...) {
+  github_content_url(
+    path,
+    owner = "cran",
+    repo = s$description$Package,
+    ref = s$description$Version)
+}
+
+source_url.base <- function(s, path = s$src_path[[1]], ...) {
+  github_content_url(
+    path,
+    owner = "wch",
+    repo = "r-source")
 }
 
 fetch_source.cran <- function(s, path) {

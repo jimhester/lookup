@@ -1,5 +1,5 @@
 Package: lookup
-Title: Lookup R function definitions, including compiled code, S3 and S4 methods.
+Title: Lookup R function definitions, including compiled code, S3 and S4 methods
 Version: 0.0.0.9000
 Authors@R: c(
   person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre")),
@@ -41,15 +41,15 @@ Remotes:
     hadley/memoise
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1.9000
-Collate:
+Collate: 
     'RcppExports.R'
     'S3.R'
     'rcpp.R'
     'call.R'
+    'internal.R'
     'external.R'
     'github.R'
     'highlight.R'
-    'internal.R'
     'lookup.R'
     'package.R'
     'registered_routines.R'
