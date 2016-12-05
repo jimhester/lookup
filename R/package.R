@@ -195,9 +195,14 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
   info <- attr(S4_methods, "info")
 
   signatures <- strsplit(sub(paste0("^", escape(f$name), ",", "(.*)-method$"), "\\1", S4_methods), ",")
-  funs <- paste0(info$from, ifelse(info$visible, "::", ":::"), info$generic, "(", lapply(signatures, paste0, collapse = ", "), ")")
 
   res <- Map(getMethod, f$name, signatures)
+
+  # Some methods don't have a package in from, so lookup the package from the function definition
+  missing_pkg <- !nzchar(info$from)
+  info$from[missing_pkg] <- lapply(res[missing_pkg], function(x) getNamespaceName(topenv(environment(x))))
+
+  funs <- paste0(info$from, ifelse(info$visible, "::", ":::"), info$generic, "(", lapply(signatures, paste0, collapse = ", "), ")")
 
   res <- method_dialog(funs, res)
 
