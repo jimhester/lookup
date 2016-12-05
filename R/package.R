@@ -118,7 +118,7 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% baseenv(
   }
   if (uses_rcpp(fun$package)) {
     rcpp_exports <- rcpp_exports(fun$package)
-    fun$ccall <- lapply(call_names(fun$def, type = rcpp_exports, subset = c(1)), lookup_function, type = "rcpp", package = fun$package)
+    fun$ccall <- c(fun$ccall, lapply(call_names(fun$def, type = rcpp_exports, subset = c(1)), lookup_function, type = "rcpp", package = fun$package))
   }
   if (is_s3_method(fun$name, env = envir)) {
     fun$type <- append(fun$type, "S3 method", 0)

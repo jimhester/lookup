@@ -1,6 +1,6 @@
 rcpp_exports <- function(package) {
   s <- as.source_type(package, "rcpp")
-  names(parse_symbol_map(fetch_symbol_map(s))$map)
+  tryCatch(names(parse_symbol_map(fetch_symbol_map(s))$map), "github_error" = function(e) character())
 }
 
 # -- Applicable to all Rcpp types --
