@@ -15,6 +15,8 @@ ester/lookup?branch=master)
 # install.packages("devtools")
 devtools::install_github("jimhester/lookup")
 ```
+See [Setup][#setup] for additional setup instructions.
+
 ## Example
 
 ### Normal Functions (with compiled code)
@@ -28,6 +30,41 @@ devtools::install_github("jimhester/lookup")
 
 ### In RStudio IDE
 ![Imgur](http://i.imgur.com/8iH3FdB.png)
+
+## Usage
+
+```r
+# Lookup a function
+lookup::lookup(body)
+
+``` r
+lookup(body)
+#> base::body [closure] 
+#> function (fun = sys.function(sys.parent())) 
+#> {
+#>     if (is.character(fun)) 
+#>         fun <- get(fun, mode = "function", envir = parent.frame())
+#>     .Internal(body(fun))
+#> }
+#> <bytecode: 0x7fa65cada988>
+#> <environment: namespace:base>
+#> // c source: src/main/builtin.c#L255-L266
+#> SEXP attribute_hidden do_body(SEXP call, SEXP op, SEXP args, SEXP rho)
+#> {
+#>     checkArity(op, args);
+#>     if (TYPEOF(CAR(args)) == CLOSXP)
+#>  return duplicate(BODY_EXPR(CAR(args)));
+#>     else {
+#>  if(!(TYPEOF(CAR(args)) == BUILTINSXP ||
+#>       TYPEOF(CAR(args)) == SPECIALSXP))
+#>      warningcall(call, _("argument is not a function"));
+#>  return R_NilValue;
+#>     }
+#> }
+
+# Can also open a browser at that function's location
+lookup_browse()
+```
 
 ## Setup
 
@@ -53,6 +90,9 @@ if (interactive()) {
 }
 ```
 
+If you do not want make this the default simply call `lookup::lookup()` on any
+function you would like to lookup.
+
 # How this works
 
 If a base R function is printed that calls compiled code the code is lookup up
@@ -75,3 +115,4 @@ properly, please [open an issue](https://github.com/jimhester/lookup/issues).
 - [Winston Chang](https://github.com/wch) For running the [Git mirror of the R Source](https://github.com/wch/r-source).
 - [Gábor Csárdi](https://github.com/gaborcsardi) For the [gh](https://github.com/r-pkgs/gh) package, the [CRAN git mirror](https://github.com/cran) and inspiration and code for handling pagination and busy updating.
 - [Jenny Bryan](https://github.com/jennybc) For codifying the process of [accessing the R source](https://github.com/jennybc/access-r-source), which was my main inspiration and motivation for starting this package.
+- [Hadley Wickham](https://github.com/jennybc) For writing `pryr::show_c_source()` which provides a simplified version of looking up internal and primitive calls and additional prior functions to test for S3 method and generic membership.
