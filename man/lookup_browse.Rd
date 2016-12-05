@@ -4,7 +4,7 @@
 \alias{lookup_browse}
 \title{Browse a lookup}
 \usage{
-lookup_browse(x = the$last_lookup, ...)
+lookup_browse(x = the$last_lookup)
 }
 \arguments{
 \item{x}{The lookup to browse, by default will use the last url of the last lookup found.}
