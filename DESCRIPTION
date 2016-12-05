@@ -1,8 +1,15 @@
 Package: lookup
-Title: Lookup and print function definitions
+Title: Lookup R function definitions, including compiled code, S3 and S4 methods.
 Version: 0.0.0.9000
-Authors@R: person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: c(
+  person("Jim", "Hester", email = "james.f.hester@gmail.com", role = c("aut", "cre")),
+  person("Hadley", "Wickham", , "hadley@rstudio.com", c("aut"), comment = "s3 generic, methods functions from pryr"),
+  person("Gábor", "Csárdi", , "csardi.gabor@gmail.com", c("aut"), comment = "Code to handle busy notifications, paging of results")
+  )
+Description: Provides a simple interface to lookup and print R function
+  definitions, including C and C++ compiled code from .Call, .C, .Internal and
+  .External calls. Also lookup of S3 and S4 generics, including a
+  simple dialog to print any or all of the loaded methods for the generic.
 Depends:
     R (>= 3.0.0)
 Imports:
@@ -47,3 +54,4 @@ Collate:
     'package.R'
     'registered_routines.R'
     'utils.R'
+Encoding: UTF-8
