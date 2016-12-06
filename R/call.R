@@ -75,35 +75,3 @@ source_files.call_base <- function(s, name = s$search, ...) {
 
   s
 }
-
-  #map <- parse_symbol_map(fetch_symbol_map(desc))
-
-  #files <- list.files(file.path(path, "src"),
-    #pattern = "[.][ch]$",
-    #ignore.case = TRUE,
-    #recursive = TRUE,
-    #full.names = TRUE)
-
-#symbol_map.c_source <- function(x, ...) {
-  #res <- parseNamespaceFile(basename(x), dirname(x), mustExist = FALSE)
-
-  #if (length(res$nativeRoutines) == 0) {
-    #return(character())
-  #}
-
-  #res$nativeRoutines[[1]]$symbolNames
-#}
-
-#lookup_source.c_call <- function(desc, name) {
-  #desc <- as.source_type(package, "c")
-
-  #map <- parse_symbol_map(fetch_symbol_map(desc))
-
-  #files <- list.files(file.path(path, "src"),
-    #pattern = "[.][ch]$",
-    #ignore.case = TRUE,
-    #recursive = TRUE,
-    #full.names = TRUE)
-
-  #find_compiled_function(paste0("[[:space:]]+", name, "\\([^)]+\\)[^;]*(?:$|\\{)"), files, "c")
-#}
