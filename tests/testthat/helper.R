@@ -2,9 +2,7 @@ with_package <- function(f, ...) {
   install_f <- memoise::memoise(function(name) {
     tryCatch(unloadNamespace(name), error = function(e) NULL)
     lib <- tempfile(tmpdir = ".cache")
-    #on.exit(unlink(lib, recursive = TRUE), add = TRUE)
     dir.create(lib)
-    libpath <- .libPaths()
     .libPaths(c(lib, .libPaths()))
     f(name, ...)
     lib

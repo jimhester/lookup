@@ -104,23 +104,3 @@ test_that("captures works properly", {
     data_frame("char" = c("one", "two", "three"),
        "num" = c("1", "2", "3")))
 })
-
-     #require(stats)
-     
-     #methods(summary)
-     #methods(class = "aov")    # S3 class
-     ### The same, with more details and more difficult to read:
-     #print(methods(class = "aov"), byclass=FALSE)
-     #methods("[[")             # uses C-internal dispatching
-     #methods("$")
-     #methods("$<-")            # replacement function
-     #methods("+")              # binary operator
-     #methods("Math")           # group generic
-     #require(graphics)
-     #methods("axis")           # looks like a generic, but is not
-     
-     #if(require(Matrix)) {
-     #print(methods(class = "Matrix"))  # S4 class
-     #m <- methods("dim")       # S3 and S4 methods
-     #print(m)
-     #print(attr(m, "info"))    # more extensive information

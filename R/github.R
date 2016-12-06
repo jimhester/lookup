@@ -29,6 +29,6 @@ github_code_search <- function(name, path = "src/", owner, repo, language = c("c
 #' lookup_usage("grep")
 #' }
 lookup_usage <- function(x) {
-  url <- paste("https://github.com/search?l=r&q=%22", as.character(x), "%22+user%3Acran+language%3AR&ref=searchresults&type=Code&utf8=%E2%9C%93", sep="", collapse="")
+  url <- paste("https://github.com/search?l=r&q=%22", as.character(x), "%22+user%3Acran+language%3AR&ref=searchresults&type=Code&utf8=%E2%9C%93", sep = "", collapse = "")
   browseURL(url)
 }

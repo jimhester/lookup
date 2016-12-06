@@ -286,10 +286,6 @@ highlight_output <- function(code, language = "r", color = TRUE) {
   }
 }
 
-# Rstudio open function in viewer
-# Just function(x) View(x) or maybe
-# (rstudioapi::findFun("sendToConsole"))('View(cat)', echo = F)
-
 attached_functions <- memoise(function(sp = search()) {
   fnames <- lapply(seq_along(sp), ls)
   data.frame(name = unlist(fnames),
@@ -306,7 +302,7 @@ print.getAnywhere <- function(x, ...) {
   package <- grepl("^package:", x$where)
   namespace <- grepl("^namespace:", x$where)
   defs <- x$objs[namespace]
-  name <- if(any(package)) {
+  name <- if (any(package)) {
     paste0(sub("package:", "", x$where[package]), "::", x$name)
   } else if (any(namespace)) {
     paste0(sub("namespace:", "", x$where[namespace]), ":::", x$name)
