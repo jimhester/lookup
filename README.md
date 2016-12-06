@@ -86,7 +86,7 @@ lookup can be used as a complete replacement for function printing by attaching
 the package. To make this the default simply add this to your `.Rprofile`.
 ```r
 if (interactive()) {
-  library(lookup)
+  suppressPackageStartupMessages(library(lookup))
 }
 ```
 
