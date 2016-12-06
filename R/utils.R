@@ -167,7 +167,7 @@ msg <- function(x, ..., width = getOption("width"), nl = TRUE) {
   cat(paste(txt, collapse = "\n"), if (isTRUE(nl)) "\n")
 }
 
-method_dialog <- function(funs, res) {
+method_dialog <- function(funs, res, type) {
   names(res) <- funs
   if (length(res) > 1) {
     alphabetically <- order(funs)
@@ -178,7 +178,7 @@ method_dialog <- function(funs, res) {
     nums <- as.character(seq_along(funs))
     width_nums <- max(nchar(nums))
     cat(multicol(paste0(cyan(sprintf(paste0("%", width_nums, "s"), nums)), "| ", funs)), sep = "")
-    ans <- get_answer(paste0(bold("Which method(s)?"), " (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
+    ans <- get_answer(paste0(bold("Which", type, "method(s)?"), " (1-", length(funs), ", [A]ll): "), c(seq_along(funs), "A"), "A")
 
     if (ans != "A") {
       res <- res[as.integer(ans)]

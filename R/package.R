@@ -122,19 +122,25 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% baseenv(
     rcpp_exports <- rcpp_exports(fun$package)
     fun$ccall <- c(fun$ccall, lapply(call_names(fun$def, type = rcpp_exports, subset = c(1)), lookup_function, type = "rcpp", package = fun$package))
   }
-  if (is_s3_method(fun$name, env = envir)) {
-    fun$type <- append(fun$type, "S3 method", 0)
-  }
-  if (is_s3_generic(fun$name, env = envir)) {
-    fun$type <- append(fun$type, "S3 generic", 0)
-    fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
-  }
   if (isS4(fun$def)) {
     if (is(fun$def, "genericFunction")) {
       fun$type <- append(fun$type, "S4 generic", 0)
       fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
     } else {
       fun$type <- append(fun$type, "S4 method")
+    }
+  } else {
+    if (is_s3_method(fun$name, env = envir)) {
+      fun$type <- append(fun$type, "S3 method", 0)
+    }
+    if (is_s3_generic(fun$name, env = envir)) {
+      fun$type <- append(fun$type, "S3 generic", 0)
+      fun$S3_methods <- lookup_S3_methods(fun, envir = envir, all = all)
+
+      # Could also potentially have S4 methods
+      if (.isMethodsDispatchOn()) {
+        fun$S4_methods <- lookup_S4_methods(fun, envir = envir, all = all)
+      }
     }
   }
 
@@ -185,7 +191,7 @@ lookup_S3_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   funs <- paste0(pkgs, ifelse(visible, "::", ":::"), nms)
 
-  res <- method_dialog(funs, res)
+  res <- method_dialog(funs, res, "S3")
 
   lapply(res, lookup)
 }
@@ -209,7 +215,7 @@ lookup_S4_methods <- function(f, envir = parent.frame(), all = FALSE, ...) {
 
   funs <- paste0(info$from, ifelse(info$visible, "::", ":::"), info$generic, "(", lapply(signatures, paste0, collapse = ", "), ")")
 
-  res <- method_dialog(funs, res)
+  res <- method_dialog(funs, res, "S4")
 
   lapply(res, lookup)
 }
