@@ -6,7 +6,6 @@ parse_symbol_map <- function(s, ...) UseMethod("parse_symbol_map") # s$map, s$re
 source_files <- function(s, ...) UseMethod("source_files") # s$src_files
 fetch_source <- function(s, path) UseMethod("fetch_source") # s$src_path, s$src_lines
 parse_source <- function(s, search) UseMethod("parse_source") # s$fun_start, s$fun_end, s$fun_lines
-source_url <- function(s, ...) UseMethod("source_url")
 
 fetch_symbol_map.unknown <- function(s, ...) s
 parse_symbol_map.unknown <- function(s, ...) s
