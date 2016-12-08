@@ -124,9 +124,9 @@ gh <- memoise(function(...) {
 
 paths <- function(...) {
   args <- compact(list(...))
-  args[-1] <- gsub("^[/\\]", "", args[-1])
-  args[-length(args)] <- gsub("[/\\]$", "", args[-length(args)])
-  paste(args[nzchar(args)], collapse = "/")
+  args[-1] <- lapply(args[-1], gsub, pattern = "^[/\\]", replacement = "")
+  args[-length(args)] <- lapply(args[-length(args)], gsub, pattern = "[/\\]$", replacement = "")
+  do.call(file.path, args[nzchar(args)])
 }
 
 # any function using unlist or c was dropping the classnames,
