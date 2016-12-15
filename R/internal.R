@@ -14,7 +14,7 @@ parse_symbol_map.internal <- function(s, name = s$name, ...) {
   res <- na.omit(captures(lines, m))
   s$map <- setNames(res[[2]], res[[1]])
   s$search <- s$map[s$name]
-  s$regex <- paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+", s$search, "\\([^)(]+\\)[[:space:]]*\\{")
+  s$regex <- paste0("SEXP[[:space:]]+attribute_hidden[[:space:]]+(?:NORET[[:space:]]+)?", s$search, "\\([^)(]+\\)[[:space:]]*\\{")
   s
 }
 
