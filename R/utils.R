@@ -5,8 +5,38 @@
 #' @importFrom crayon cyan strip_style
 NULL
 
+p <- function(..., .collapse = NULL, .sep = "") {
+  args <- list(...)
+  named <- has_names(args)
+
+  if (any(named)) {
+    # Interpret $ as in perl / shell
+    for (i in which(named)) {
+      args[!named] <- lapply(args[!named], gsub, pattern = regex_escape(paste0("$", names(args)[[i]])), replacement = backslash_escape(args[[i]]))
+    }
+    args <- args[!named]
+  }
+  paste(args, collapse = .collapse, sep = .sep)
+}
+
+is_named <- function(x) {
+  all(has_names(x))
+}
+has_names <- function(x) {
+  nms <- names(x)
+  if (is.null(nms)) {
+    rep(FALSE, length(x))
+  } else {
+    !(is.na(nms) | nms == "")
+  }
+}
+
 bq <- function(x) {
   paste0("`", x, "`")
+}
+
+backslash_escape <- function(x) {
+  gsub("\\\\", "\\\\\\\\", x, fixed = FALSE)
 }
 
 regex_escape <- function(x) {

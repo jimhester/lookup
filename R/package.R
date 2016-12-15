@@ -34,7 +34,7 @@ as_lookup.getAnywhere <- function(x, ...) {
 
   # getAnywhere can return multiple definitions with the same name in different namespaces
   lapply(which(!x$dups), function(idx) {
-    package <- sub("^registered S3 method for \\w+ from namespace (\\w+)", "\\1", x$where[[idx]])
+    package <- sub("^registered S3 method for [^ ]+ from namespace (\\w+):?.*", "\\1", x$where[[idx]])
     package <- sub("^namespace:", "", package)
     package <- sub("^package:", "", package)
     def <- x$objs[[idx]]
