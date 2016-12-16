@@ -116,7 +116,7 @@ lookup <- function(x, name = substitute(x), envir = environment(x) %||% baseenv(
   } else {
     fun$internal <- lapply(call_names(fun$def, type = ".Internal", subset = c(2, 1)), lookup_function, type = "internal")
     fun$external <- lapply(call_names(fun$def, type = ".External", subset = c(2)), lookup_function, type = "external", package = fun$package)
-    fun$ccall <- lapply(call_names(fun$def, type = c(".C", ".Call"), subset = c(2)), lookup_function, type = "call", package = fun$package)
+    fun$ccall <- lapply(call_names(fun$def, type = c(".C", ".Call", ".Call2"), subset = c(2)), lookup_function, type = "call", package = fun$package)
   }
   if (uses_rcpp(fun$package)) {
     rcpp_exports <- rcpp_exports(fun$package)

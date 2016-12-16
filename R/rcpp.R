@@ -87,6 +87,15 @@ fetch_symbol_map.rcpp_cran <- function(s) {
   s
 }
 
+fetch_symbol_map.rcpp_bioc <- function(s) {
+  s$map_lines <- github_content(
+    path = "src/RcppExports.cpp",
+    owner = "Bioconductor-mirror",
+    repo = s$description$Package,
+    ref = bioc_branch())
+  s
+}
+
 source_files.rcpp_local <- function(s, ...) {
   path <- s$description$RemoteUrl
   s$src_files <- list.files(paths(path, "src"),
@@ -135,6 +144,18 @@ source_files.rcpp_cran <- function(s, name = s$search, ...) {
   s
 }
 
+source_files.rcpp_bioc <- function(s, name = s$search, ...) {
+  s$src_files <- github_code_search(
+    name = name,
+    path = "src/",
+    owner = "Bioconductor-mirror",
+    repo = s$description$Package)
+
+  # Ignore the RcppExports file, not what we want
+  s$src_files <- s$src_files[basename(s$src_files) != "RcppExports.cpp"]
+  s
+}
+
 fetch_source.github <- function(s, path) {
   s$src_lines <- github_content(
     path = path,
@@ -162,6 +183,14 @@ source_url.cran <- function(s, path = s$src_path[[1]], ...) {
     ref = s$description$Version)
 }
 
+source_url.bioc <- function(s, path = s$src_path[[1]], ...) {
+  github_content_url(
+    path,
+    owner = "Bioconductor-mirror",
+    repo = s$description$Package,
+    ref = bioc_branch())
+}
+
 source_url.base <- function(s, path = s$src_path[[1]], ...) {
   github_content_url(
     path,
@@ -175,6 +204,17 @@ fetch_source.cran <- function(s, path) {
     owner = "cran",
     repo = s$description$Package,
     ref = s$description$Version)
+
+  s$src_path <- path
+  s
+}
+
+fetch_source.bioc <- function(s, path) {
+  s$src_lines <- github_content(
+    path,
+    owner = "Bioconductor-mirror",
+    repo = s$description$Package,
+    ref = bioc_branch())
 
   s$src_path <- path
   s

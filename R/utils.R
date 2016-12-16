@@ -274,3 +274,11 @@ is_terminal <- function() {
 should_page <- function(src) {
   is_interactive() && is_terminal() && length(src) > num_lines()
 }
+
+bioc_branch <- function() {
+  if (BiocInstaller::isDevel()) {
+    "master"
+  } else {
+    paste0("release-", BiocInstaller::biocVersion())
+  }
+}

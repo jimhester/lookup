@@ -34,7 +34,8 @@ Suggests:
     tibble,
     lassoshooting,
     devtools,
-    covr
+    covr,
+    BiocInstaller
 Remotes:
     jimhester/highlite,
     gaborcsardi/gh,

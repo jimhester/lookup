@@ -1,6 +1,9 @@
 # lookup
 
-> Lookup R function definitions, including compiled code, S3 and S4 methods.
+> Lookup R function definitions, including compiled code, S3 and S4 methods
+> from packages installed locally, or from [GitHub][http://rpkg.gepuro.net/],
+> [CRAN](https://cran.r-project.org) or
+> [Bioconductor](https://www.bioconductor.org).
 
 [![Travis-CI Build Status](https://travis-ci.org/jimhester/lookup.svg?branch=master)](https://travis-ci.org/jimhester/lookup)
 [![Coverage Status](https://img.shields.io/codecov/c/github/jimhester/lookup/master.svg)](https://codecov.io/github/jimh

@@ -65,6 +65,16 @@ source_files.call_cran <- function(s, name = s$search, ...) {
   s
 }
 
+source_files.call_bioc <- function(s, name = s$search, ...) {
+  s$src_files <- github_code_search(
+    name = name,
+    path = "src/",
+    owner = "Bioconductor-mirror",
+    repo = s$description$Package,
+    language = "c")
+
+  s
+}
 source_files.call_base <- function(s, name = s$search, ...) {
   s$src_files <- github_code_search(
     name = name,

@@ -27,6 +27,8 @@ as.source_type <- function(package, type, name = NULL) { # s$search, s$type, s$l
     desc$RemoteType <- "base"
   } else if (desc$Repository %==% "CRAN") {
     desc$RemoteType <- "cran"
+  } else if (!is.null(desc$biocViews)) {
+    desc$RemoteType <- "bioc"
   }
 
   remote_type <- desc$RemoteType %||% "unknown"
