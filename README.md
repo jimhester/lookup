@@ -18,7 +18,7 @@ ester/lookup?branch=master)
 # install.packages("devtools")
 devtools::install_github("jimhester/lookup")
 ```
-See [Setup][#setup] for additional setup instructions.
+See [Setup](#setup) for additional setup instructions.
 
 ## Example
 
