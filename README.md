@@ -38,9 +38,6 @@ See [Setup](#setup) for additional setup instructions.
 ```r
 # Lookup a function
 lookup::lookup(body)
-
-``` r
-lookup(body)
 #> base::body [closure] 
 #> function (fun = sys.function(sys.parent())) 
 #> {
@@ -92,8 +89,7 @@ if (interactive()) {
 }
 ```
 
-If you do not want make this the default simply call `lookup::lookup()` on any
-function you would like to lookup.
+If you do not want make this the default simply call `lookup::lookup()`.
 
 # How this works
 
