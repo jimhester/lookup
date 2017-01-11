@@ -21,11 +21,13 @@ as_lookup.lookup <- function(x, envir = parent.frame(), ...) {
 
 as_lookup.character <- function(x, envir = parent.frame(), ...) {
   res <- list()
-  res[c("package", "name")] <- parse_name(x)
-  res$def <- get(res$name, envir = res$package %||% envir, mode = "function")
-  res$package <- res$package %||% function_package(res$def)
-  res$type <- typeof(res$def)
-  res$visible <- is_visible(res$name)
+  tryCatch({
+    res[c("package", "name")] <- parse_name(x)
+    res$def <- get(res$name, envir = res$package %||% envir, mode = "function")
+    res$package <- res$package %||% function_package(res$def)
+    res$type <- typeof(res$def)
+    res$visible <- is_visible(res$name)
+  }, error = function(e) NULL)
   class(res) <- "lookup"
   res
 }
@@ -76,11 +78,14 @@ find_fun_name <- function(x, env) {
 as_lookup.function <- function(x, envir = environment(x), name = substitute(x)) {
   res <- list(def = x)
 
-  res$package <- function_package(res$def)
-  env <- topenv(envir)
-  res$name <- find_fun_name(x, env)
-  res$type <- typeof(res$def)
-  res$visible <- is_visible(res$name)
+  tryCatch({
+    res$package <- function_package(res$def)
+    env <- topenv(envir)
+    res$name <- find_fun_name(x, env)
+    res$type <- typeof(res$def)
+    res$visible <- is_visible(res$name)},
+    error = function(e) NULL)
+
   class(res) <- "lookup"
   res
 }
@@ -110,6 +115,10 @@ as_lookup.MethodDefinition <- function(x, envir = environment(x), name = substit
 #' @export
 lookup <- function(x, name = substitute(x), envir = environment(x) %||% baseenv(), all = FALSE, ...) {
   fun <- as_lookup(x, envir = envir, name = name)
+
+  if (is.null(fun$type)) {
+    return(fun$def)
+  }
 
   if (fun$type %in% c("builtin", "special")) {
     fun$internal <- list(lookup_function(fun$name, type = "internal"))
@@ -232,6 +241,12 @@ print.lookup <-
       force(x)
       force(highlight)
 
+      # If the object isn't a list fallback to base::print.default
+      if (!is.list(x) || is.null(x$type)) {
+        cat(highlight_output(base::print.function(x), language = "r", highlight), sep = "\n")
+        return(invisible(x))
+      }
+
       level <<- level + 1
       on.exit(level <<- level - 1)
       # S4 methods
@@ -243,13 +258,6 @@ print.lookup <-
         if (!is.null(x$signature)) {
           cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
         }
-
-        def <-
-          if (isS4(x$def)) {
-            x$def@.Data
-          } else {
-            x$def
-          }
 
         if (rstudioapi::isAvailable()) {
           View(def, title = name)
