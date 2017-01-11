@@ -14,4 +14,3 @@ If a github or CRAN lookup, this will open a browser to the github code
 mirror. If a local file will open the application associated with that file
 type.
 }
-

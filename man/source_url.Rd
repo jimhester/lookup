@@ -14,4 +14,3 @@ source_url(x, ...)
 \description{
 Retrieve the source url(s) from a lookup object
 }
-

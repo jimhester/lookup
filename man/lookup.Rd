@@ -22,4 +22,3 @@ lookup(x, name = substitute(x), envir = environment(x) \%||\% baseenv(),
 \description{
 Lookup a function definiton
 }
-
