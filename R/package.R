@@ -259,6 +259,13 @@ print.lookup <-
           cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
         }
 
+        def <-
+          if (isS4(x$def)) {
+            x$def@.Data
+          } else {
+            x$def
+          }
+
         if (rstudioapi::isAvailable()) {
           View(def, title = name)
         } else {
