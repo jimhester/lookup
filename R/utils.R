@@ -79,7 +79,7 @@ Compiled <- function(...) {
 }
 
 #' @export
-print.compiled <- function(x, ..., highlight = crayon::has_color()) {
+print.compiled <- function(x, ..., highlight = crayon::has_color(), in_console = getOption("lookup.in_console", rstudioapi::isAvailable())) {
   language <- x$language
   if (language == "c++") {
     language <- "c"
@@ -89,7 +89,7 @@ print.compiled <- function(x, ..., highlight = crayon::has_color()) {
   if (isTRUE(highlight)) {
     body <- highlight_string(body, language = language)
   }
-  if (rstudioapi::hasFun("navigateToFile")) {
+  if (isTRUE(in_console) && rstudioapi::hasFun("navigateToFile")) {
     view_str(paste0(heading, "\n", body), paste0(x$name, ".", x$language))
   } else {
     cat(heading, body, sep = "\n")

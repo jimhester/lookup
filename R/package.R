@@ -236,7 +236,7 @@ print.lookup <-
   local({
     level <- 0
 
-    function(x, envir = parent.frame(), highlight = crayon::has_color(), ...) {
+    function(x, ..., envir = parent.frame(), highlight = crayon::has_color(), in_console = getOption("lookup.in_console", rstudioapi::isAvailable())) {
       # Need to evaluate these before the capture.output
       force(x)
       force(highlight)
@@ -266,22 +266,22 @@ print.lookup <-
             x$def
           }
 
-        if (rstudioapi::isAvailable()) {
+        if (isTRUE(in_console)) {
           View(def, title = name)
         } else {
           cat(highlight_output(base::print.function(def), language = "r", highlight), sep = "\n")
         }
-        lapply(x[["internal"]], print, envir = envir, highlight = highlight)
-        lapply(x[["external"]], print, envir = envir, highlight = highlight)
-        lapply(x[["ccall"]], print, envir = envir, highlight = highlight)
-        lapply(x[["S3_methods"]], print, envir = envir, highlight = highlight)
-        lapply(x[["S4_methods"]], print, envir = envir, highlight = highlight)
+        lapply(x[["internal"]], print, envir = envir, highlight = highlight, in_console = in_console)
+        lapply(x[["external"]], print, envir = envir, highlight = highlight, in_console = in_console)
+        lapply(x[["ccall"]], print, envir = envir, highlight = highlight, in_console = in_console)
+        lapply(x[["S3_methods"]], print, envir = envir, highlight = highlight, in_console = in_console)
+        lapply(x[["S4_methods"]], print, envir = envir, highlight = highlight, in_console = in_console)
         invisible()
       })
 
       if (level == 1 && should_page(str)) {
         page_str(str)
-      } else if (!rstudioapi::isAvailable()){
+      } else if (!isTRUE(in_console)) {
         cat(str, sep = "\n")
       }
 
