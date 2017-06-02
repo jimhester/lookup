@@ -78,8 +78,21 @@ Compiled <- function(...) {
      class = "compiled")
 }
 
+get_call_names <- function() {
+  vapply(head(sys.calls(), n = -1),
+    function(x) {
+      as.character(head(x, n = 1))
+    }, character(1))
+}
+
+in_completion_function <- function() {
+  ".rs.getFunctionArgumentNames" %in% get_call_names()
+}
+
+in_rstudio <- function() rstudioapi::isAvailable()
+
 #' @export
-print.compiled <- function(x, ..., highlight = crayon::has_color(), in_console = getOption("lookup.in_console", rstudioapi::isAvailable())) {
+print.compiled <- function(x, ..., highlight = !in_rstudio() && crayon::has_color(), in_console = getOption("lookup.in_console", rstudioapi::isAvailable())) {
   language <- x$language
   if (language == "c++") {
     language <- "c"
@@ -280,5 +293,13 @@ bioc_branch <- function() {
     "master"
   } else {
     paste0("release-", BiocInstaller::biocVersion())
+  }
+}
+
+bold <- function(..., sep = " ") {
+  if (!in_rstudio() && crayon::has_color()) {
+    crayon::bold(..., sep = sep)
+  } else {
+    paste(..., sep = sep)
   }
 }

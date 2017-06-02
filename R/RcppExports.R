@@ -2,10 +2,10 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 parse_array_definition <- function(x) {
-    .Call('lookup_parse_array_definition', PACKAGE = 'lookup', x)
+    .Call(lookup_parse_array_definition, x)
 }
 
 find_function_end <- function(x, start = 0L) {
-    .Call('lookup_find_function_end', PACKAGE = 'lookup', x, start)
+    .Call(lookup_find_function_end, x, start)
 }
 

@@ -2,7 +2,6 @@
 #' @importFrom stats na.omit setNames
 #' @importFrom utils .S3methods capture.output getS3method packageDescription getAnywhere head tail browseURL
 #' @importFrom memoise memoise
-#' @importFrom crayon bold
 #' @importFrom highlite highlight_string
 #' @useDynLib lookup, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
@@ -236,13 +235,13 @@ print.lookup <-
   local({
     level <- 0
 
-    function(x, ..., envir = parent.frame(), highlight = crayon::has_color(), in_console = getOption("lookup.in_console", rstudioapi::isAvailable())) {
+    function(x, ..., envir = parent.frame(), highlight = !in_rstudio() && crayon::has_color(), in_console = getOption("lookup.in_console", rstudioapi::isAvailable())) {
       # Need to evaluate these before the capture.output
       force(x)
       force(highlight)
 
       # If the object isn't a list fallback to base::print.default
-      if (!is.list(x) || is.null(x$type)) {
+      if (in_completion_function() || !is.list(x) || is.null(x$type)) {
         cat(highlight_output(base::print.function(x), language = "r", highlight), sep = "\n")
         return(invisible(x))
       }
