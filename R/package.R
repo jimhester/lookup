@@ -4,7 +4,7 @@
 #' @importFrom memoise memoise
 #' @importFrom crayon bold
 #' @importFrom highlite highlight_string
-#' @useDynLib lookup
+#' @useDynLib lookup, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @export print.function
 NULL

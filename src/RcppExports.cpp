@@ -28,3 +28,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"lookup_parse_array_definition", (DL_FUNC) &lookup_parse_array_definition, 1},
+    {"lookup_find_function_end", (DL_FUNC) &lookup_find_function_end, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_lookup(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}
