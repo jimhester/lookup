@@ -1,9 +1,21 @@
 #' @include rcpp.R
 NULL
 
-native_routine_registration_map <- function(s, ...) UseMethod("native_routine_registration_map")
+native_routine_registration_map <- function(s, ...) {
+  s2 <- source_files(s, "R_CallMethodDef")
+  for (path in s2$src_files) {
+    s <- fetch_source(s, path)
+    if (any(grepl("R_CallMethodDef", s$src_lines))) {
+      m <- regexpr('^[[:space:]]*[{]"([^"]+)",[[:space:]]*[(]DL_FUNC[)][[:space:]]*&([^,]+)', s$src_lines, perl = TRUE)
+      res <- na.omit(captures(s$src_lines, m))
+      return(setNames(res[[2]], res[[1]]))
+    }
+  }
 
-native_routine_registration_map.local <- function(s, ...) {
+  NULL
+}
+
+native_routine_registration_map.github <- function(s, ...) {
   for (f in s$src_files) {
     lines <- readLines(f)
     if (any(grepl("R_CallMethodDef", lines))) {
@@ -21,8 +33,8 @@ parse_symbol_map.call <- function(s) {
   if (length(native_routines) == 0) {
     s$map <- setNames(s$name, s$name)
   } else if (isTRUE(native_routines[[1]]$useRegistration)) {
-    map <- native_routine_registration_map(s)
-    if (is.null(map)) {
+    s$map <- native_routine_registration_map(s)
+    if (is.null(s$map)) {
       vals <- s$name
       if (length(native_routines[[1]]$registrationFixes) > 0) {
         vals <- sub(paste0("^", native_routines[[1]]$registrationFixes[[1]]), native_routines[[1]]$registrationFixes[[2]], vals)
