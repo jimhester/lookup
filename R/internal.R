@@ -10,6 +10,10 @@ fetch_symbol_map.internal <- function(s, branch = "trunk") {
 }
 parse_symbol_map.internal <- function(s, name = s$name, ...) {
   lines <- s$map_lines
+
+  # strip single line comments
+  lines <- gsub("/[*].*[*]/", "", lines)
+
   m <- regexpr("^\\{\"([^\"]+)\",[[:space:]]*([^,]+)", lines, perl = TRUE)
   res <- na.omit(captures(lines, m))
   s$map <- setNames(res[[2]], res[[1]])
