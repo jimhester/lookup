@@ -253,6 +253,12 @@ print.lookup <-
       str <- capture.output(type = "output", {
         colons <- if (x$visible) "::" else ":::"
         name <- paste0(bold(x$package, colons, x$name, sep = ""), " [", paste(collapse = ", ", x$type), "]")
+
+        filename <- getSrcFilename(x$def)
+        if (length(filename) > 0) {
+          ref <- getSrcref(x$def)
+          name <- paste0(name, " ", crayon::blue(filename, "#L", as.character(ref[[1]]), "-", as.character(ref[[3]]), sep = ""))
+        }
         cat(name, "\n")
         if (!is.null(x$signature)) {
           cat("getMethod(\"", x$name, "\", c(", paste0(collapse = ", ", "\"", x$signature[1, ], "\""), "))\n", sep = "")
