@@ -1,6 +1,6 @@
 #' @importFrom methods .S4methods getMethod isGeneric is methodSignatureMatrix
 #' @importFrom stats na.omit setNames
-#' @importFrom utils .S3methods capture.output getS3method packageDescription getAnywhere head tail browseURL
+#' @importFrom utils .S3methods capture.output getS3method packageDescription getAnywhere head tail browseURL getSrcFilename getSrcref
 #' @importFrom memoise memoise
 #' @importFrom highlite highlight_string
 #' @useDynLib lookup, .registration = TRUE
