@@ -47,7 +47,6 @@ with_cran_package("lassoshooting", {
     expect_null(lookup_function("missing", "external", "lassoshooting"))
   })
 })
-}
 
 test_that("lookup_function base functions", {
   res <- lookup_function("C_doD", "external", "stats")
@@ -59,3 +58,4 @@ test_that("lookup_function base functions", {
 
   expect_null(lookup_function("missing", "external", "stats"))
 })
+}
