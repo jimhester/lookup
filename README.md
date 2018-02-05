@@ -93,7 +93,7 @@ If you do not want make this the default simply call `lookup::lookup()`.
 
 # How this works
 
-If a base R function is printed that calls compiled code the code is lookup up
+If a base R function is printed that calls compiled code the code is looked up
 using the [R git mirror](https://github.com/wch/r-source). If a CRAN package
 has compiled code it is looked up on the [CRAN git
 mirror](https://github.com/cran). If a package is installed with
@@ -105,7 +105,7 @@ This has been tested to work with `.Internal`, `.External`, `.C`, `.Call` and
 
 ## Issues ##
 This package uses a number of heuristics to find function definitions. This
-means it can fail in some cases, if you find a function that is not lookup up
+means it can fail in some cases, if you find a function that is not looked up
 properly, please [open an issue](https://github.com/jimhester/lookup/issues).
 
 ## Thanks ##
