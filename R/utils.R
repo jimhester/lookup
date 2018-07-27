@@ -112,7 +112,7 @@ print.compiled <- function(x, ..., highlight = !in_rstudio() && crayon::has_colo
 captures <- function(x, m) {
   assert(is.character(x), "'x' must be a character vector")
   assert(class(m) == "integer" &&
-    identical(names(attributes(m)), c("match.length", "useBytes", "capture.start", "capture.length", "capture.names")),
+    all(c("match.length", "useBytes", "capture.start", "capture.length", "capture.names") %in% names(attributes(m))),
     "'m' must be the result of 'regexpr()' with 'perl = TRUE'")
 
   starts <- attr(m, "capture.start")
