@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // parse_array_definition
 List parse_array_definition(std::string x);
-RcppExport SEXP lookup_parse_array_definition(SEXP xSEXP) {
+RcppExport SEXP _lookup_parse_array_definition(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -18,7 +18,7 @@ END_RCPP
 }
 // find_function_end
 int find_function_end(const CharacterVector& x, int start);
-RcppExport SEXP lookup_find_function_end(SEXP xSEXP, SEXP startSEXP) {
+RcppExport SEXP _lookup_find_function_end(SEXP xSEXP, SEXP startSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,8 +30,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"lookup_parse_array_definition", (DL_FUNC) &lookup_parse_array_definition, 1},
-    {"lookup_find_function_end", (DL_FUNC) &lookup_find_function_end, 2},
+    {"_lookup_parse_array_definition", (DL_FUNC) &_lookup_parse_array_definition, 1},
+    {"_lookup_find_function_end", (DL_FUNC) &_lookup_find_function_end, 2},
     {NULL, NULL, 0}
 };
 
