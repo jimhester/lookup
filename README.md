@@ -73,6 +73,8 @@ hour](https://developer.github.com/v3/#rate-limiting) when unauthenticated. You
 can create a [Personal access token](https://github.com/settings/tokens) with
 no scope, which will increase your limit to 5000 requests per hour.
 
+The usethis package has a helper function to help you generate such a token, [`usethis::browse_github_token()`](https://usethis.r-lib.org/reference/browse_github_token.html).
+
 Once you have generated a token, add it to your `~/.Renviron` file or shell
 startup file and it will be automatically used for further requests.
 ```
