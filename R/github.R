@@ -45,7 +45,7 @@ lookup_usage <- function(x, user = "cran", language = "R") {
   }
   url <- paste(
     "https://github.com/search?l=&q=",
-    URLencode(as.character(x)),
+    URLencode(as.character(x), reserved = TRUE),
     user_detail,
     language_detail,
     "&ref=searchresults&type=Code&utf8=%E2%9C%93",
