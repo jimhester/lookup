@@ -73,7 +73,7 @@ hour](https://developer.github.com/v3/#rate-limiting) when unauthenticated. You
 can create a [Personal access token](https://github.com/settings/tokens) with
 no scope, which will increase your limit to 5000 requests per hour.
 
-The usethis package has a helper function to help you generate such a token, [`usethis::browse_github_token()`](https://usethis.r-lib.org/reference/browse_github_token.html).
+The usethis package has a helper function to help you generate such a token, [`usethis::create_github_token()`](https://usethis.r-lib.org/reference/github-token.html).
 
 Once you have generated a token, add it to your `~/.Renviron` file or shell
 startup file and it will be automatically used for further requests.
@@ -113,6 +113,6 @@ properly, please [open an issue](https://github.com/jimhester/lookup/issues).
 ## Thanks ##
 - [R Core and Community](https://www.r-project.org) For promoting open source software to make this possible.
 - [Winston Chang](https://github.com/wch) For running the [Git mirror of the R Source](https://github.com/wch/r-source).
-- [Gábor Csárdi](https://github.com/gaborcsardi) For the [gh](https://github.com/r-pkgs/gh) package, the [CRAN git mirror](https://github.com/cran) and inspiration and code for handling pagination and busy updating.
+- [Gábor Csárdi](https://github.com/gaborcsardi) For the [gh](https://github.com/r-lib/gh) package, the [CRAN git mirror](https://github.com/cran) and inspiration and code for handling pagination and busy updating.
 - [Jenny Bryan](https://github.com/jennybc) For codifying the process of [accessing the R source](https://github.com/jennybc/access-r-source), which was my main inspiration and motivation for starting this package.
 - [Hadley Wickham](https://github.com/hadley) For writing `pryr::show_c_source()` which provides a simplified version of looking up internal and primitive calls and additional prior functions to test for S3 method and generic membership.
